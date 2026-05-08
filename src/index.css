@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #2f2b27;
+  background: #f7f0e7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(201, 130, 99, 0.35);
+}
+
+.soft-noise {
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(255, 250, 242, 0.92), transparent 34%),
+    radial-gradient(circle at 76% 14%, rgba(111, 146, 155, 0.18), transparent 30%),
+    radial-gradient(circle at 80% 86%, rgba(127, 149, 113, 0.19), transparent 32%),
+    linear-gradient(135deg, #f7f0e7 0%, #efe1d1 100%);
+}
+
+.enter {
+  animation: enter 280ms ease both;
+}
+
+.float-in {
+  animation: float-in 360ms ease both;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
