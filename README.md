@@ -1,25 +1,120 @@
 # Mood Room MVP
 
-A React + TypeScript + Tailwind MVP for mood-based AI entertainment in bored, lonely, or tired moments.
+一个面向无聊、孤独、疲惫时刻的 mood-based AI entertainment Web MVP。
 
-## Run
+产品承诺：
+
+> Open this when you are bored, lonely, or tired, but do not want to scroll short videos or force yourself to socialize.
+
+它不是学习 app，不是效率工具，不是聊天机器人，不是短视频流，也不是社交网络。
+
+## 功能概览
+
+### Home
+
+首页只有一个选择问题：
+
+> What kind of boredom is this?
+
+用户从三个大卡片进入对应模式：
+
+- Make the room less quiet
+- Give me a tiny strange story
+- Give me something stupid to do
+
+### Room
+
+被动陪伴模式。
+
+- 两个虚构角色自然聊天，用户只是旁听者
+- 没有输入框
+- 没有 chatbot 行为
+- 支持多组角色：Kai/Mina、Jules/Nori、Ada/Sol
+- 支持 `Quieter` / `Weirder`，通过本地话题标签挑选不同语气的内容
+- 对话逐句出现，支持 `Pause / Resume`
+- 支持轻微环境底声 `Sound on / Sound off`
+- 支持切换角色组 `New pair`
+
+### Tiny Story
+
+短小荒诞互动故事。
+
+- 每个故事 1-3 分钟
+- 每一步只有 2-3 个简单选择
+- 语气偏 playful、strange、low-pressure
+- 支持 `New story`
+- 默认使用本地故事数据，可选接入生成内容
+
+### Stupid Mission
+
+纯娱乐的现实世界小任务。
+
+- 没有 streak
+- 没有积分
+- 没有生产力目标
+- 支持 `Done` / `Skip` / `Make it weirder`
+- 默认使用本地任务数据，可选接入生成内容
+
+## 当前不做什么
+
+这个 MVP 刻意不包含：
+
+- 聊天输入框
+- 无限 feed
+- 点赞、评论、分享
+- 用户主页
+- 账号系统
+- 支付系统
+- 打卡、积分、等级、成长体系
+- 复杂 onboarding
+
+核心体验应该像一个安静的开关，而不是一个平台。
+
+## 技术栈
+
+- React
+- TypeScript
+- Tailwind CSS
+- Vite
+- 本地 mock data
+- 可选 Vite dev middleware 生成接口：`/api/generate`
+
+## 本地运行
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173/`.
+打开：
 
-## Optional AI generation
+```text
+http://127.0.0.1:5173/
+```
 
-The app works with local fallback content by default. To try real generation in local dev:
+## 构建
+
+```bash
+npm run build
+```
+
+预览生产构建：
+
+```bash
+npm run preview
+```
+
+## 可选 AI 生成
+
+默认情况下，app 完全依赖本地数据运行，不需要任何 API key。
+
+如果要在本地开发时尝试真实生成：
 
 ```bash
 cp .env.example .env
 ```
 
-Then set:
+然后填写：
 
 ```bash
 OPENAI_API_KEY=your_key_here
@@ -27,10 +122,109 @@ OPENAI_MODEL=gpt-5.4-nano
 VITE_USE_AI_GENERATION=true
 ```
 
-The browser never receives `OPENAI_API_KEY`. Vite serves a local `/api/generate` endpoint during development, and the frontend falls back to local data if generation is disabled or unavailable.
+说明：
 
-## Build
+- 浏览器不会拿到 `OPENAI_API_KEY`
+- API key 只在本地 Vite middleware 中读取
+- 前端只请求本地 `/api/generate`
+- 生成失败、未配置 key、返回格式不合格时，自动 fallback 到本地 mock data
+- 当前实现使用 OpenAI Responses API + structured JSON output
+
+### 关于 DeepSeek
+
+DeepSeek API 可以接入，但当前代码尚未切换到 DeepSeek provider。
+
+如果要接 DeepSeek，建议保留现在的前端调用方式，只替换服务端 `/api/generate` 内部实现：
+
+- 使用 `DEEPSEEK_API_KEY`
+- 请求 `https://api.deepseek.com/chat/completions`
+- 使用 `deepseek-v4-flash` 或 `deepseek-v4-pro`
+- 要求模型返回 JSON
+- 保留本地 schema 校验和 mock fallback
+
+不要把 DeepSeek key 放进前端环境变量。
+
+## 项目结构
+
+```text
+.
+├── index.html
+├── package.json
+├── vite.config.ts
+├── tsconfig.json
+├── tailwind.config.js
+├── postcss.config.js
+├── .env.example
+└── src
+    ├── App.tsx
+    ├── main.tsx
+    ├── index.css
+    ├── types.ts
+    ├── components
+    │   ├── Home.tsx
+    │   ├── ModeCard.tsx
+    │   ├── RoomMode.tsx
+    │   ├── TinyStoryMode.tsx
+    │   ├── MissionMode.tsx
+    │   ├── ConversationBubble.tsx
+    │   ├── PrimaryButton.tsx
+    │   └── SecondaryButton.tsx
+    ├── data
+    │   ├── characters.ts
+    │   ├── roomConversations.ts
+    │   ├── tinyStories.ts
+    │   └── stupidMissions.ts
+    ├── hooks
+    │   └── useAmbientSound.ts
+    ├── services
+    │   └── generationClient.ts
+    └── utils
+        └── random.ts
+```
+
+## 内容数据
+
+本地内容集中在 `src/data`：
+
+- `characters.ts`：角色组和关系设定
+- `roomConversations.ts`：Room 模式对话和标签
+- `tinyStories.ts`：微故事和分支选择
+- `stupidMissions.ts`：现实世界小任务
+
+Room topic 使用标签区分语气：
+
+- `quiet`
+- `weird`
+- `cozy`
+- `domestic`
+- `night`
+- `rain`
+- `object-drama`
+- `absurd`
+
+## 写作规则
+
+内容应该遵守这些原则：
+
+- 角色不说 “as an AI”
+- 不做心理治疗
+- 不讲人生道理
+- 不像 podcast 主持人
+- Room 模式不直接要求用户参与
+- 语气像在旁边听到两个放松的人闲聊
+- 温暖、日常、稍微好笑、低压力
+- 奇怪但不幼稚
+
+## 部署说明
+
+纯静态部署可以直接使用本地 mock 内容。
+
+如果线上也要启用 AI 生成，需要把当前 Vite dev middleware 中的 `/api/generate` 迁移到真实后端或 serverless function。不要在前端暴露任何模型供应商的 API key。
+
+## Scripts
 
 ```bash
-npm run build
+npm run dev      # 启动本地开发服务
+npm run build    # TypeScript 检查 + Vite 构建
+npm run preview  # 预览生产构建
 ```
