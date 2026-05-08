@@ -24,6 +24,14 @@ export default {
           "BlinkMacSystemFont",
           "Segoe UI",
           "sans-serif"
+        ],
+        serif: [
+          "Lora",
+          "ui-serif",
+          "Georgia",
+          "Cambria",
+          "Times New Roman",
+          "serif"
         ]
       }
     }

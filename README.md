@@ -117,32 +117,20 @@ cp .env.example .env
 然后填写：
 
 ```bash
-OPENAI_API_KEY=your_key_here
-OPENAI_MODEL=gpt-5.4-nano
+DEEPSEEK_API_KEY=your_key_here
+DEEPSEEK_MODEL=deepseek-chat
 VITE_USE_AI_GENERATION=true
 ```
 
 说明：
 
-- 浏览器不会拿到 `OPENAI_API_KEY`
+- 浏览器不会拿到 `DEEPSEEK_API_KEY`
 - API key 只在本地 Vite middleware 中读取
 - 前端只请求本地 `/api/generate`
 - 生成失败、未配置 key、返回格式不合格时，自动 fallback 到本地 mock data
-- 当前实现使用 OpenAI Responses API + structured JSON output
-
-### 关于 DeepSeek
-
-DeepSeek API 可以接入，但当前代码尚未切换到 DeepSeek provider。
-
-如果要接 DeepSeek，建议保留现在的前端调用方式，只替换服务端 `/api/generate` 内部实现：
-
-- 使用 `DEEPSEEK_API_KEY`
-- 请求 `https://api.deepseek.com/chat/completions`
-- 使用 `deepseek-v4-flash` 或 `deepseek-v4-pro`
-- 要求模型返回 JSON
-- 保留本地 schema 校验和 mock fallback
-
-不要把 DeepSeek key 放进前端环境变量。
+- 当前实现请求 `https://api.deepseek.com/chat/completions`，使用 `response_format: { type: "json_object" }`，依赖前端 schema 校验丢弃异常输出
+- 默认模型 `deepseek-chat`，可改成 `deepseek-reasoner`（更慢更贵，对 playful 内容容易过度思考，不推荐）
+- 可选 `DEEPSEEK_BASE_URL` 环境变量用来指向兼容 OpenAI 协议的代理或自托管端点
 
 ## 项目结构
 

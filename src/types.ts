@@ -63,7 +63,5 @@ export type TinyStory = {
 export type StupidMission = {
   id: string;
   mission: string;
-  weirderMission: string;
-  doneResponse: string;
   source?: "local" | "generated";
 };

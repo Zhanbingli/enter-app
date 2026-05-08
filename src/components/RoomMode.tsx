@@ -2,237 +2,221 @@ import { useEffect, useMemo, useState } from "react";
 import { characterPairs } from "../data/characters";
 import { roomConversations } from "../data/roomConversations";
 import { useAmbientSound } from "../hooks/useAmbientSound";
+import { useEscape } from "../hooks/useEscape";
+import { track, useTrackMode } from "../services/analytics";
 import { generateRoomConversation } from "../services/generationClient";
-import type { CharacterPair, RoomConversation, RoomTone } from "../types";
+import type {
+  CharacterPair,
+  ConversationLine,
+  RoomConversation,
+  RoomTone,
+  RoomTopicTag
+} from "../types";
 import { randomItem, randomItemExcept } from "../utils/random";
 import { ConversationBubble } from "./ConversationBubble";
-import { PrimaryButton } from "./PrimaryButton";
-import { SecondaryButton } from "./SecondaryButton";
 
 type RoomModeProps = {
   onOff: () => void;
 };
 
-type RoomState = {
-  pair: CharacterPair;
-  conversation: RoomConversation;
+type StreamLine = ConversationLine & {
+  key: string;
+  align: "left" | "right";
 };
 
-function getConversationPool(pairId: string, tone: RoomTone) {
-  const pairConversations = roomConversations.filter(
-    (conversation) => conversation.pairId === pairId
-  );
+const STREAM_CAP = 6;
 
+function getTimeHint(): RoomTopicTag | undefined {
+  const hour = new Date().getHours();
+  if (hour < 6) return "night";
+  if (hour < 11) return "cozy";
+  if (hour < 18) return undefined;
+  if (hour < 22) return "domestic";
+  return "night";
+}
+
+function getInitialTone(): RoomTone {
+  const hour = new Date().getHours();
+  return hour < 6 || hour >= 23 ? "quiet" : "regular";
+}
+
+function getConversationPool(
+  pairId: string,
+  tone: RoomTone,
+  hint?: RoomTopicTag
+): RoomConversation[] {
+  const all = roomConversations.filter((c) => c.pairId === pairId);
   if (tone === "regular") {
-    return pairConversations;
+    if (hint) {
+      const hinted = all.filter((c) => c.tags.includes(hint));
+      if (hinted.length >= 2) return hinted;
+    }
+    return all;
   }
-
-  const tagged = pairConversations.filter((conversation) =>
-    conversation.tags.includes(tone)
-  );
-
-  return tagged.length > 0 ? tagged : pairConversations;
+  const tagged = all.filter((c) => c.tags.includes(tone));
+  return tagged.length > 0 ? tagged : all;
 }
 
 function pickConversation(
   pairId: string,
   tone: RoomTone,
-  currentId?: string
+  currentId?: string,
+  hint?: RoomTopicTag
 ) {
-  return randomItemExcept(getConversationPool(pairId, tone), currentId);
-}
-
-function createInitialRoomState(): RoomState {
-  const pair = randomItem(characterPairs);
-  return {
-    pair,
-    conversation: pickConversation(pair.id, "regular")
-  };
+  return randomItemExcept(getConversationPool(pairId, tone, hint), currentId);
 }
 
 export function RoomMode({ onOff }: RoomModeProps) {
-  const [{ pair, conversation }, setRoomState] = useState(createInitialRoomState);
-  const [tone, setTone] = useState<RoomTone>("regular");
-  const [revealedCount, setRevealedCount] = useState(1);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const { isSoundOn, toggleSound, stopSound } = useAmbientSound();
-
-  const lineLimit =
-    tone === "quiet"
-      ? Math.min(3, conversation.lines.length)
-      : conversation.lines.length;
-  const visibleLines = useMemo(
-    () => conversation.lines.slice(0, lineLimit).slice(0, revealedCount),
-    [conversation.lines, lineLimit, revealedCount]
+  const [pair] = useState<CharacterPair>(() => randomItem(characterPairs));
+  const [tone, setTone] = useState<RoomTone>(getInitialTone);
+  const [conversation, setConversation] = useState<RoomConversation>(() =>
+    pickConversation(pair.id, getInitialTone(), undefined, getTimeHint())
   );
-  const isComplete = revealedCount >= lineLimit;
+  const [lineIndex, setLineIndex] = useState(0);
+  const [streamLines, setStreamLines] = useState<StreamLine[]>([]);
+  const [isToneLoading, setIsToneLoading] = useState(false);
+  const { startSound, stopSound } = useAmbientSound();
 
-  useEffect(() => {
-    setRevealedCount(1);
-    setIsPaused(false);
-  }, [conversation.id, tone]);
-
-  useEffect(() => {
-    if (isPaused || isComplete) {
-      return;
-    }
-
-    const pace = tone === "quiet" ? 1850 : tone === "weird" ? 1050 : 1350;
-    const timer = window.setTimeout(() => {
-      setRevealedCount((count) => Math.min(count + 1, lineLimit));
-    }, pace);
-
-    return () => window.clearTimeout(timer);
-  }, [isPaused, isComplete, lineLimit, tone, revealedCount]);
-
-  async function loadConversation(nextTone: RoomTone, nextPair = pair) {
-    setTone(nextTone);
-    setIsGenerating(true);
-
-    const generatedConversation = await generateRoomConversation(
-      nextTone,
-      nextPair,
-      conversation.topic
-    );
-
-    setRoomState({
-      pair: nextPair,
-      conversation:
-        generatedConversation ??
-        pickConversation(nextPair.id, nextTone, conversation.id)
-    });
-    setIsGenerating(false);
-  }
-
-  function changePair() {
-    const nextPair = randomItemExcept(characterPairs, pair.id);
-    void loadConversation("regular", nextPair);
-  }
+  const lineLimit = useMemo(
+    () =>
+      tone === "quiet"
+        ? Math.min(3, conversation.lines.length)
+        : conversation.lines.length,
+    [tone, conversation.lines.length]
+  );
+  const isAtEnd = lineIndex >= lineLimit;
 
   function leaveRoom() {
     stopSound();
     onOff();
   }
 
+  useTrackMode("room");
+  useEscape(leaveRoom);
+
+  useEffect(() => {
+    void startSound();
+    return () => stopSound();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (isAtEnd || isToneLoading) return;
+    const pace = tone === "quiet" ? 6500 : tone === "weird" ? 4500 : 5500;
+    const delay = streamLines.length === 0 ? 250 : pace;
+    const timer = window.setTimeout(() => {
+      const line = conversation.lines[lineIndex];
+      setStreamLines((prev) => {
+        const next: StreamLine = {
+          speaker: line.speaker,
+          text: line.text,
+          align:
+            line.speaker === pair.characterA.name ? "left" : "right",
+          key: `${conversation.id}-${lineIndex}`
+        };
+        const updated = [...prev, next];
+        return updated.length > STREAM_CAP
+          ? updated.slice(-STREAM_CAP)
+          : updated;
+      });
+      setLineIndex((i) => i + 1);
+    }, delay);
+    return () => window.clearTimeout(timer);
+  }, [
+    isAtEnd,
+    isToneLoading,
+    lineIndex,
+    tone,
+    conversation,
+    pair,
+    streamLines.length
+  ]);
+
+  useEffect(() => {
+    if (!isAtEnd || isToneLoading) return;
+    const gap = tone === "quiet" ? 8500 : 6500;
+    const fromConvId = conversation.id;
+    const timer = window.setTimeout(() => {
+      track("room_auto_advance", { tone, fromConvId });
+      void loadNextConversation(tone);
+    }, gap);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAtEnd, isToneLoading, tone, conversation.id]);
+
+  async function loadNextConversation(nextTone: RoomTone) {
+    if (nextTone !== tone) setTone(nextTone);
+    const generated = await generateRoomConversation(
+      nextTone,
+      pair,
+      conversation.topic
+    );
+    const next =
+      generated ??
+      pickConversation(pair.id, nextTone, conversation.id, getTimeHint());
+    setConversation(next);
+    setLineIndex(0);
+  }
+
+  async function changeTone(nextTone: RoomTone) {
+    track("room_tone_change", { from: tone, to: nextTone });
+    setIsToneLoading(true);
+    try {
+      await loadNextConversation(nextTone);
+    } finally {
+      setIsToneLoading(false);
+    }
+  }
+
+  const total = streamLines.length;
+
   return (
-    <main className="mx-auto min-h-screen w-full max-w-5xl px-5 py-6 sm:px-8 sm:py-10">
-      <div className="mb-6 flex items-center justify-between gap-3">
+    <div className="soft-room min-h-screen">
+      <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-5 py-8 sm:px-8 sm:py-10">
         <button
-          className="text-sm font-semibold text-ink/56 transition hover:text-ink"
+          className="inline-flex min-h-11 items-center self-start px-2 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink/35 transition hover:text-ink"
           onClick={leaveRoom}
         >
-          Back
+          off
         </button>
-        <span className="rounded-full border border-ink/10 bg-cream/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-ink/48">
-          Room
-        </span>
-      </div>
 
-      <section className="grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
-        <aside className="enter rounded-lg border border-ink/10 bg-cream/78 p-6 shadow-soft backdrop-blur">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-cocoa/50">
-            Current pair
-          </p>
-          <h1 className="mt-4 text-4xl font-semibold leading-tight text-ink">
-            {pair.characterA.name} and {pair.characterB.name}
-          </h1>
-          <p className="mt-4 text-base leading-7 text-ink/62">
-            {pair.relationship}
-          </p>
-
-          <div className="mt-8 space-y-5 border-t border-ink/10 pt-5">
-            <div>
-              <p className="text-sm font-semibold text-tide">
-                {pair.characterA.name}
-              </p>
-              <p className="mt-1 text-sm leading-6 text-ink/62">
-                {pair.characterA.personality}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-clay">
-                {pair.characterB.name}
-              </p>
-              <p className="mt-1 text-sm leading-6 text-ink/62">
-                {pair.characterB.personality}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6 flex flex-wrap gap-2">
-            {conversation.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full border border-ink/10 bg-white/50 px-3 py-1 text-xs font-semibold text-ink/50"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        </aside>
-
-        <section className="enter rounded-lg border border-ink/10 bg-cream/88 p-4 shadow-soft backdrop-blur sm:p-6">
-          <div className="border-b border-ink/10 pb-5">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-cocoa/50">
-              Current topic
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold leading-tight text-ink sm:text-3xl">
-              {conversation.topic}
-            </h2>
-          </div>
-
-          <div
-            key={`${conversation.id}-${tone}`}
-            className={`mt-6 min-h-[18rem] space-y-4 ${
-              tone === "quiet" ? "opacity-80" : "opacity-100"
-            }`}
-          >
-            {visibleLines.map((line, index) => (
+      <section className="mt-auto space-y-4" aria-live="polite">
+        {streamLines.map((line, index) => {
+          const age = total - 1 - index;
+          const opacity = Math.max(1 - age * 0.15, 0.3);
+          return (
+            <div
+              key={line.key}
+              style={{ opacity }}
+              className="transition-opacity duration-700"
+            >
               <ConversationBubble
-                key={`${conversation.id}-${index}`}
-                line={line}
-                index={index}
-                align={line.speaker === pair.characterA.name ? "left" : "right"}
+                line={{ speaker: line.speaker, text: line.text }}
+                index={0}
+                align={line.align}
               />
-            ))}
-          </div>
-
-          <div className="mt-8 flex flex-wrap gap-3">
-            <PrimaryButton
-              onClick={() => void loadConversation("regular")}
-              disabled={isGenerating}
-            >
-              {isGenerating ? "Finding..." : "Next topic"}
-            </PrimaryButton>
-            <SecondaryButton
-              onClick={() => void loadConversation("quiet")}
-              disabled={isGenerating}
-            >
-              Quieter
-            </SecondaryButton>
-            <SecondaryButton
-              onClick={() => void loadConversation("weird")}
-              disabled={isGenerating}
-            >
-              Weirder
-            </SecondaryButton>
-            <SecondaryButton
-              onClick={() => setIsPaused((value) => !value)}
-              disabled={isComplete && !isPaused}
-            >
-              {isPaused ? "Resume" : "Pause"}
-            </SecondaryButton>
-            <SecondaryButton onClick={() => void toggleSound()}>
-              {isSoundOn ? "Sound off" : "Sound on"}
-            </SecondaryButton>
-            <SecondaryButton onClick={changePair} disabled={isGenerating}>
-              New pair
-            </SecondaryButton>
-            <SecondaryButton onClick={leaveRoom}>Off</SecondaryButton>
-          </div>
-        </section>
+            </div>
+          );
+        })}
       </section>
-    </main>
+
+        <div className="mt-10 flex justify-center gap-8">
+          <button
+            className="inline-flex min-h-11 items-center px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink/35 transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
+            onClick={() => void changeTone("quiet")}
+            disabled={isToneLoading}
+          >
+            quieter
+          </button>
+          <button
+            className="inline-flex min-h-11 items-center px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink/35 transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
+            onClick={() => void changeTone("weird")}
+            disabled={isToneLoading}
+          >
+            weirder
+          </button>
+        </div>
+      </main>
+    </div>
   );
 }

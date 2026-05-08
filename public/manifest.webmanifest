@@ -1,0 +1,19 @@
+{
+  "name": "Mood Room",
+  "short_name": "Mood Room",
+  "description": "A mood-based ambient companion for bored, lonely, or tired moments.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f0e7",
+  "theme_color": "#f7f0e7",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

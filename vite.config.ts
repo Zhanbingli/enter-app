@@ -14,7 +14,6 @@ type GenerationRequest = {
   avoidTopic?: string;
   avoidTitle?: string;
   avoidMission?: string;
-  weird?: boolean;
 };
 
 const roomTags = [
@@ -58,27 +57,6 @@ function isGenerationRequest(value: unknown): value is GenerationRequest {
   return typeof value === "object" && value !== null && "kind" in value;
 }
 
-function extractOutputText(payload: unknown) {
-  const response = payload as {
-    output_text?: unknown;
-    output?: Array<{ content?: Array<{ type?: string; text?: unknown }> }>;
-  };
-
-  if (typeof response.output_text === "string") {
-    return response.output_text;
-  }
-
-  for (const item of response.output ?? []) {
-    for (const content of item.content ?? []) {
-      if (content.type === "output_text" && typeof content.text === "string") {
-        return content.text;
-      }
-    }
-  }
-
-  return null;
-}
-
 function baseInstructions() {
   return [
     "You generate tiny entertainment content for a calm mood app.",
@@ -88,154 +66,112 @@ function baseInstructions() {
     "No lessons, advice, diagnosis, self-improvement, inspirational framing, or podcast-host language.",
     "Tone: warm, casual, gently strange, slightly funny, low-pressure, emotionally soft but not childish.",
     "Keep wording concise. Avoid direct address in Room mode.",
-    "Return only content that matches the JSON schema."
+    "Return ONLY a single JSON object that matches the requested shape. No prose, no markdown, no code fence."
   ].join("\n");
 }
 
-function roomSchema(firstSpeaker: string, secondSpeaker: string) {
-  return {
-    type: "object",
-    additionalProperties: false,
-    required: ["id", "topic", "texture", "tags", "lines"],
-    properties: {
-      id: { type: "string" },
-      topic: { type: "string" },
-      texture: { type: "string" },
-      tags: {
-        type: "array",
-        minItems: 2,
-        maxItems: 4,
-        items: { type: "string", enum: roomTags }
-      },
-      lines: {
-        type: "array",
-        minItems: 3,
-        maxItems: 5,
-        items: {
-          type: "object",
-          additionalProperties: false,
-          required: ["speaker", "text"],
-          properties: {
-            speaker: { type: "string", enum: [firstSpeaker, secondSpeaker] },
-            text: { type: "string" }
-          }
-        }
-      }
-    }
-  };
+function roomShape(firstSpeaker: string, secondSpeaker: string) {
+  return JSON.stringify(
+    {
+      id: "string slug",
+      topic: "string, one short phrase",
+      texture: "string, one word like quiet, weird, hummed",
+      tags: `array of 2-4 strings, each from ${JSON.stringify(roomTags)}`,
+      lines: `array of 3-5 objects { "speaker": "${firstSpeaker}" or "${secondSpeaker}", "text": string }`
+    },
+    null,
+    2
+  );
 }
 
-const storySchema = {
-  type: "object",
-  additionalProperties: false,
-  required: ["id", "title", "scenario", "startStepId", "steps"],
-  properties: {
-    id: { type: "string" },
-    title: { type: "string" },
-    scenario: { type: "string" },
-    startStepId: { type: "string", enum: ["start"] },
-    steps: {
-      type: "array",
-      minItems: 4,
-      maxItems: 7,
-      items: {
-        type: "object",
-        additionalProperties: false,
-        required: ["id", "text", "choices", "ending"],
-        properties: {
-          id: { type: "string" },
-          text: { type: "string" },
-          choices: {
-            type: "array",
-            maxItems: 3,
-            items: {
-              type: "object",
-              additionalProperties: false,
-              required: ["label", "nextStepId"],
-              properties: {
-                label: { type: "string" },
-                nextStepId: { type: "string" }
-              }
-            }
-          },
-          ending: { type: "string" }
-        }
-      }
-    }
-  }
-};
+const storyShape = JSON.stringify(
+  {
+    id: "string slug",
+    title: "string",
+    scenario: "string, one or two sentences",
+    startStepId: "exactly the string 'start'",
+    steps:
+      "array of 4-7 step objects: { id: string, text: string, choices: array of 0-3 { label: string, nextStepId: string }, ending: string (empty string if this step is not an ending) }"
+  },
+  null,
+  2
+);
 
-const missionSchema = {
-  type: "object",
-  additionalProperties: false,
-  required: ["id", "mission", "weirderMission", "doneResponse"],
-  properties: {
-    id: { type: "string" },
-    mission: { type: "string" },
-    weirderMission: { type: "string" },
-    doneResponse: { type: "string" }
-  }
-};
+const missionShape = JSON.stringify(
+  {
+    id: "string slug",
+    mission: "string, one short imperative sentence"
+  },
+  null,
+  2
+);
 
-function buildGenerationPrompt(request: GenerationRequest) {
-  if (request.kind === "room") {
-    return [
-      baseInstructions(),
-      "Mode: Room.",
-      "Write overheard dialogue between the two named characters. They talk to each other, never to the user.",
-      "Quiet tone should feel softer, shorter, and less punchline-driven. Weird tone should be stranger and more object-focused without becoming frantic.",
-      `Requested tone: ${request.tone ?? "regular"}.`,
-      `Avoid repeating this topic: ${request.avoidTopic ?? "none"}.`,
-      `Character context: ${JSON.stringify(request.pair)}.`
-    ].join("\n");
-  }
+function buildPrompts(request: GenerationRequest): {
+  system: string;
+  user: string;
+} {
+  const system = baseInstructions();
 
-  if (request.kind === "story") {
-    return [
-      baseInstructions(),
-      "Mode: Tiny Story.",
-      "Create one absurd micro-story for 1-3 minutes of play. The start step must have 2 or 3 simple choices.",
-      "Use id 'start' for the first step. Ending steps should have an empty choices array and a short ending string.",
-      `Avoid repeating this title: ${request.avoidTitle ?? "none"}.`
-    ].join("\n");
-  }
-
-  return [
-    baseInstructions(),
-    "Mode: Stupid Mission.",
-    "Create one tiny real-world mission. It must be pure entertainment, not productivity, wellness, learning, cleaning, exercise, or self-improvement.",
-    "The mission should be doable in the room in under a minute.",
-    `Make the base mission especially weird: ${request.weird ? "yes" : "no"}.`,
-    `Avoid repeating this mission: ${request.avoidMission ?? "none"}.`
-  ].join("\n");
-}
-
-function schemaForRequest(request: GenerationRequest) {
   if (request.kind === "room") {
     const firstSpeaker = request.pair?.characterA?.name ?? "Kai";
     const secondSpeaker = request.pair?.characterB?.name ?? "Mina";
-    return roomSchema(firstSpeaker, secondSpeaker);
+    const user = [
+      "Mode: Room.",
+      "Write overheard dialogue between the two named characters. They talk to each other, never to the user.",
+      "Quiet tone: softer, shorter, less punchline-driven. Weird tone: stranger and more object-focused, never frantic.",
+      `Requested tone: ${request.tone ?? "regular"}.`,
+      `Avoid repeating this topic: ${request.avoidTopic ?? "none"}.`,
+      `Character context: ${JSON.stringify(request.pair)}.`,
+      "",
+      "Return JSON shaped like:",
+      roomShape(firstSpeaker, secondSpeaker)
+    ].join("\n");
+    return { system, user };
   }
 
   if (request.kind === "story") {
-    return storySchema;
+    const user = [
+      "Mode: Tiny Story.",
+      "Create one absurd micro-story for 1-3 minutes of play. The start step must have 2 or 3 simple choices.",
+      "Use id 'start' for the first step. Ending steps must have an empty choices array and a short ending string. Non-ending steps must have an empty string for ending.",
+      `Avoid repeating this title: ${request.avoidTitle ?? "none"}.`,
+      "",
+      "Return JSON shaped like:",
+      storyShape
+    ].join("\n");
+    return { system, user };
   }
 
-  return missionSchema;
+  const user = [
+    "Mode: Stupid Mission.",
+    "Create one tiny real-world mission. It must be pure entertainment, not productivity, wellness, learning, cleaning, exercise, or self-improvement.",
+    "The mission should be doable in the room in under a minute.",
+    "No reward language, no scoring, no follow-up celebration. Just the mission line itself.",
+    `Avoid repeating this mission: ${request.avoidMission ?? "none"}.`,
+    "",
+    "Return JSON shaped like:",
+    missionShape
+  ].join("\n");
+  return { system, user };
 }
 
-async function callOpenAI(
+async function callDeepSeek(
   request: GenerationRequest,
   env: Record<string, string>
 ) {
-  const apiKey = env.OPENAI_API_KEY ?? process.env.OPENAI_API_KEY;
+  const apiKey = env.DEEPSEEK_API_KEY ?? process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) return null;
 
-  if (!apiKey) {
-    return null;
-  }
+  const model =
+    env.DEEPSEEK_MODEL ?? process.env.DEEPSEEK_MODEL ?? "deepseek-chat";
+  const baseUrl =
+    env.DEEPSEEK_BASE_URL ??
+    process.env.DEEPSEEK_BASE_URL ??
+    "https://api.deepseek.com";
 
-  const model = env.OPENAI_MODEL ?? process.env.OPENAI_MODEL ?? "gpt-5.4-nano";
-  const response = await fetch("https://api.openai.com/v1/responses", {
+  const { system, user } = buildPrompts(request);
+
+  const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -243,26 +179,30 @@ async function callOpenAI(
     },
     body: JSON.stringify({
       model,
-      input: buildGenerationPrompt(request),
-      max_output_tokens: request.kind === "story" ? 1200 : 700,
-      text: {
-        format: {
-          type: "json_schema",
-          name: `${request.kind}_entertainment`,
-          strict: true,
-          schema: schemaForRequest(request)
-        }
-      }
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: request.kind === "story" ? 1400 : 800,
+      temperature: 1.3
     })
   });
 
-  if (!response.ok) {
+  if (!response.ok) return null;
+
+  const payload = (await response.json()) as {
+    choices?: Array<{ message?: { content?: unknown } }>;
+  };
+
+  const content = payload.choices?.[0]?.message?.content;
+  if (typeof content !== "string") return null;
+
+  try {
+    return JSON.parse(content);
+  } catch {
     return null;
   }
-
-  const payload = await response.json();
-  const outputText = extractOutputText(payload);
-  return outputText ? JSON.parse(outputText) : null;
 }
 
 function aiGenerationPlugin(env: Record<string, string>): Plugin {
@@ -283,7 +223,7 @@ function aiGenerationPlugin(env: Record<string, string>): Plugin {
             return;
           }
 
-          const result = await callOpenAI(body, env);
+          const result = await callDeepSeek(body, env);
 
           if (!result) {
             sendJson(response, 204, {});
@@ -303,6 +243,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
   return {
-    plugins: [react(), aiGenerationPlugin(env)]
+    plugins: [react(), aiGenerationPlugin(env)],
+    server: { host: "127.0.0.1" }
   };
 });

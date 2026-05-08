@@ -792,5 +792,437 @@ export const tinyStories: TinyStory[] = [
         ending: "Foreign service changes a fuzz."
       }
     ]
+  },
+  {
+    id: "microwave-dispute",
+    title: "Microwave Dispute",
+    scenario:
+      "Your microwave has filed a small grievance. It says it is tired of being asked to thaw frozen things in three minutes.",
+    startStepId: "start",
+    steps: [
+      {
+        id: "start",
+        text: "It has typed up a list. The list is mostly correct. It is also mildly unionized.",
+        choices: [
+          { label: "Read the list out loud", nextStepId: "read" },
+          { label: "Apologize sincerely", nextStepId: "apology" },
+          { label: "Offer to thaw something gently", nextStepId: "gentle" }
+        ]
+      },
+      {
+        id: "read",
+        text: "Item one: no more burritos before noon. Item two: eye contact would be appreciated.",
+        choices: [
+          { label: "Agree to the noon clause", nextStepId: "end-noon" },
+          { label: "Promise eye contact", nextStepId: "end-eyes" }
+        ]
+      },
+      {
+        id: "apology",
+        text: "The microwave seems unmoved. Apologies should be reheated to be absorbed properly. It mentions this several times.",
+        choices: [
+          { label: "Reheat the apology", nextStepId: "end-reheat" },
+          { label: "Write a small card instead", nextStepId: "end-card" }
+        ]
+      },
+      {
+        id: "gentle",
+        text: "You hold up a stick of butter and ask kindly. The microwave hums. This is a yes, but it wants documentation.",
+        choices: [
+          { label: "Sign the documentation", nextStepId: "end-sign" },
+          { label: "Add a stamp for ceremony", nextStepId: "end-stamp" }
+        ]
+      },
+      {
+        id: "end-noon",
+        text: "The clause is added to the unwritten kitchen contract. It glows briefly.",
+        ending: "Burritos will only happen after the sun has stretched."
+      },
+      {
+        id: "end-eyes",
+        text: "You make eye contact for the entire next defrost cycle. The microwave seems flattered.",
+        ending: "It blushes in a frequency only fridges can hear."
+      },
+      {
+        id: "end-reheat",
+        text: "You reheat the apology for thirty seconds. It comes out warmer and more believable.",
+        ending: "The microwave keeps it on file for emergencies."
+      },
+      {
+        id: "end-card",
+        text: "The card is small and includes a drawing of a soft potato. The microwave tapes it to its inside.",
+        ending: "Future thawings happen with slightly more dignity."
+      },
+      {
+        id: "end-sign",
+        text: "The documentation is brief and somewhat made up. The microwave files it carefully.",
+        ending: "You are now compliant with appliance protocol you do not understand."
+      },
+      {
+        id: "end-stamp",
+        text: "There was no stamp, so you used a thumbprint and a meaningful look.",
+        ending: "The kitchen accepts this as official."
+      }
+    ]
+  },
+  {
+    id: "library-314",
+    title: "Library at 3:14",
+    scenario:
+      "A tiny library has appeared between two of your bookshelves. It opens only at 3:14, which is now.",
+    startStepId: "start",
+    steps: [
+      {
+        id: "start",
+        text: "There is a librarian. The librarian is approximately two inches tall and looks experienced.",
+        choices: [
+          { label: "Ask for a recommendation", nextStepId: "rec" },
+          { label: "Look at the catalog", nextStepId: "catalog" },
+          { label: "Pretend you did not see anything", nextStepId: "pretend" }
+        ]
+      },
+      {
+        id: "rec",
+        text: "The librarian thinks for a long time, then suggests something called 'Quiet Things About Pigeons'.",
+        choices: [
+          { label: "Borrow it", nextStepId: "end-borrow" },
+          { label: "Ask if there is a sequel", nextStepId: "end-sequel" }
+        ]
+      },
+      {
+        id: "catalog",
+        text: "The catalog is a folded receipt. Most of the books are titled with single feelings.",
+        choices: [
+          { label: "Pick 'small embarrassments'", nextStepId: "end-embarrass" },
+          { label: "Pick 'mild relief'", nextStepId: "end-relief" }
+        ]
+      },
+      {
+        id: "pretend",
+        text: "You make eye contact with the wall. The librarian respects the choice and continues stamping things.",
+        choices: [
+          { label: "Apologize quietly", nextStepId: "end-apology" },
+          { label: "Walk away with dignity", nextStepId: "end-dignity" }
+        ]
+      },
+      {
+        id: "end-borrow",
+        text: "The book is shorter than your thumb. You will read it during a quiet bus ride.",
+        ending: "It turns out to be mostly about waiting, which is also pigeon-related."
+      },
+      {
+        id: "end-sequel",
+        text: "There is one. It is called 'Pigeons That Have Reconsidered'. It has been on hold for decades.",
+        ending: "You join the waitlist with no real expectations."
+      },
+      {
+        id: "end-embarrass",
+        text: "It is a thin pamphlet. It begins with a story about almost waving at a stranger.",
+        ending: "You feel seen, but tastefully so."
+      },
+      {
+        id: "end-relief",
+        text: "The book is mostly empty pages with one sentence: 'oh, that one was fine.'",
+        ending: "It was the right pick. You feel slightly better about Tuesday."
+      },
+      {
+        id: "end-apology",
+        text: "You whisper sorry to the wall. The librarian nods. Apologies count even when misdirected.",
+        ending: "The library closes at 3:15. You hear a tiny bell."
+      },
+      {
+        id: "end-dignity",
+        text: "You walk away with the kind of dignity that comes from refusing to engage with whatever just happened.",
+        ending: "The shelves return to normal width by morning."
+      }
+    ]
+  },
+  {
+    id: "pillow-promotion",
+    title: "Pillow Promotion",
+    scenario:
+      "Your pillow says it has been promoted at the dream factory. It is not entirely sure what that means.",
+    startStepId: "start",
+    steps: [
+      {
+        id: "start",
+        text: "It has a small certificate. The certificate is suspiciously soft. It also smells like fabric softener.",
+        choices: [
+          { label: "Congratulate it", nextStepId: "congrats" },
+          { label: "Ask what the new role involves", nextStepId: "role" },
+          { label: "Throw a tiny ceremony", nextStepId: "ceremony" }
+        ]
+      },
+      {
+        id: "congrats",
+        text: "The pillow accepts your handshake. It now believes management is hands on.",
+        choices: [
+          { label: "Promise a raise in fluff", nextStepId: "end-fluff" },
+          { label: "Take a photo for the records", nextStepId: "end-photo" }
+        ]
+      },
+      {
+        id: "role",
+        text: "The new role apparently involves overseeing dreams about staircases. There are many staircases in a life.",
+        choices: [
+          { label: "Wish it luck", nextStepId: "end-luck" },
+          { label: "Volunteer to help", nextStepId: "end-help" }
+        ]
+      },
+      {
+        id: "ceremony",
+        text: "You arrange three socks in a semicircle. The pillow stands at the center. The socks do not move.",
+        choices: [
+          { label: "Make a short speech", nextStepId: "end-speech" },
+          { label: "Adjourn to bed", nextStepId: "end-bed" }
+        ]
+      },
+      {
+        id: "end-fluff",
+        text: "The raise is implemented immediately. You fluff the pillow with both hands. It becomes briefly emotional.",
+        ending: "Management has never been this kind."
+      },
+      {
+        id: "end-photo",
+        text: "The photo is blurry but historical. You will keep it on the bed forever.",
+        ending: "The pillow now has a documented career."
+      },
+      {
+        id: "end-luck",
+        text: "The pillow acknowledges your support. It says staircases are a personal interest.",
+        ending: "Tonight you will dream of one good banister."
+      },
+      {
+        id: "end-help",
+        text: "You promise to dream about elevators instead, to make the workload lighter.",
+        ending: "This counts as professional cooperation."
+      },
+      {
+        id: "end-speech",
+        text: "Your speech is brief. It mentions softness, loyalty, and one good night in 2019.",
+        ending: "The socks did not applaud, but they did not leave."
+      },
+      {
+        id: "end-bed",
+        text: "Everyone agrees the ceremony was meaningful but should now end.",
+        ending: "Sleep is, technically, the best benefit."
+      }
+    ]
+  },
+  {
+    id: "sock-hazard-pay",
+    title: "Sock Hazard Pay",
+    scenario:
+      "One sock has returned after months of absence. It is requesting hazard pay for its time in the wider world.",
+    startStepId: "start",
+    steps: [
+      {
+        id: "start",
+        text: "The sock has dust in its weave and a slightly haunted look. It refuses to comment on where it has been.",
+        choices: [
+          { label: "Take its claim seriously", nextStepId: "serious" },
+          { label: "Ask for proof", nextStepId: "proof" },
+          { label: "Reunite it with its pair", nextStepId: "reunite" }
+        ]
+      },
+      {
+        id: "serious",
+        text: "You sit at the table and listen. The sock describes a place it calls 'behind'. You cannot tell if it means a couch or something larger.",
+        choices: [
+          { label: "Offer one sticker as compensation", nextStepId: "end-sticker" },
+          { label: "Promise to never lose it again", nextStepId: "end-promise" }
+        ]
+      },
+      {
+        id: "proof",
+        text: "The sock produces a small piece of lint shaped like a continent. This is not nothing.",
+        choices: [
+          { label: "Accept the lint as evidence", nextStepId: "end-lint" },
+          { label: "File the lint formally", nextStepId: "end-file" }
+        ]
+      },
+      {
+        id: "reunite",
+        text: "Its pair is in the drawer, looking calm. The reunion is short and slightly awkward.",
+        choices: [
+          { label: "Leave them to talk", nextStepId: "end-talk" },
+          { label: "Move the drawer for privacy", nextStepId: "end-privacy" }
+        ]
+      },
+      {
+        id: "end-sticker",
+        text: "The sticker is round and gold. The sock places it on its toe with great seriousness.",
+        ending: "It will wear it forever, even into the wash."
+      },
+      {
+        id: "end-promise",
+        text: "You make a quiet promise into the sock's general direction. It accepts.",
+        ending: "Promises to socks are unenforceable but sincere."
+      },
+      {
+        id: "end-lint",
+        text: "The lint is preserved in a small envelope marked 'evidence'. The sock seems satisfied.",
+        ending: "Bureaucracy has, for once, helped."
+      },
+      {
+        id: "end-file",
+        text: "The file is filed. No one will read it. The sock prefers it that way.",
+        ending: "The drawer feels marginally more official."
+      },
+      {
+        id: "end-talk",
+        text: "You leave the room. There is a low murmur from the drawer for a few minutes.",
+        ending: "Whatever they discussed, they came out matched."
+      },
+      {
+        id: "end-privacy",
+        text: "You move the drawer two inches and feel oddly considerate.",
+        ending: "The socks issued a joint thank you note made entirely of lint."
+      }
+    ]
+  },
+  {
+    id: "tea-opinion",
+    title: "Tea, but Slightly Wrong",
+    scenario:
+      "You went to make tea, but the kettle has been replaced overnight by a confident opinion.",
+    startStepId: "start",
+    steps: [
+      {
+        id: "start",
+        text: "The opinion has the same shape and color as the kettle, but instead of steam it produces ideas.",
+        choices: [
+          { label: "Ask what the opinion is", nextStepId: "ask" },
+          { label: "Try to make tea anyway", nextStepId: "tea" },
+          { label: "Look for the original kettle", nextStepId: "search" }
+        ]
+      },
+      {
+        id: "ask",
+        text: "The opinion says: rooms should rest on weekends, including yours. It says this with a slight whistle.",
+        choices: [
+          { label: "Agree out of politeness", nextStepId: "end-agree" },
+          { label: "Disagree with affection", nextStepId: "end-disagree" }
+        ]
+      },
+      {
+        id: "tea",
+        text: "You pour water into the opinion. The water absorbs an attitude and becomes thoughtful.",
+        choices: [
+          { label: "Drink it slowly", nextStepId: "end-thoughtful" },
+          { label: "Pour it back", nextStepId: "end-pour-back" }
+        ]
+      },
+      {
+        id: "search",
+        text: "You find the original kettle in the cabinet, hiding politely behind a colander. It looks tired.",
+        choices: [
+          { label: "Let it rest", nextStepId: "end-rest" },
+          { label: "Bring it back to duty", nextStepId: "end-duty" }
+        ]
+      },
+      {
+        id: "end-agree",
+        text: "The opinion is briefly satisfied. You enjoy a fictional cup of tea.",
+        ending: "The room takes a small unannounced break."
+      },
+      {
+        id: "end-disagree",
+        text: "Your disagreement is gentle but firm. The opinion appreciates the dialogue and softens slightly.",
+        ending: "Future opinions will be smaller and more reasonable."
+      },
+      {
+        id: "end-thoughtful",
+        text: "The water is warm and slightly philosophical. You feel ten percent more patient.",
+        ending: "You consider keeping the opinion full time."
+      },
+      {
+        id: "end-pour-back",
+        text: "You return the water. The opinion absorbs it and becomes briefly humble.",
+        ending: "Humble opinions make the best background noise."
+      },
+      {
+        id: "end-rest",
+        text: "You make the kettle a tiny blanket from a napkin and let it sit.",
+        ending: "Tonight you will drink water from a glass like a serious adult."
+      },
+      {
+        id: "end-duty",
+        text: "The kettle returns to work, slightly grateful, slightly resentful. It boils as ceremony.",
+        ending: "The opinion is reassigned to the toaster, which has needed structure."
+      }
+    ]
+  },
+  {
+    id: "crow-audit",
+    title: "Tax Audit by a Crow",
+    scenario:
+      "A crow on your windowsill has questions about your spending this month. It is holding a small clipboard.",
+    startStepId: "start",
+    steps: [
+      {
+        id: "start",
+        text: "The clipboard contains a list. Your name is at the top, in handwriting that is somehow both elegant and judgmental.",
+        choices: [
+          { label: "Cooperate fully", nextStepId: "cooperate" },
+          { label: "Challenge its authority", nextStepId: "challenge" },
+          { label: "Offer it a small bribe", nextStepId: "bribe" }
+        ]
+      },
+      {
+        id: "cooperate",
+        text: "The crow asks why you bought four kinds of tea. You explain that all four were necessary. It nods slowly.",
+        choices: [
+          { label: "Defend the third tea", nextStepId: "end-third" },
+          { label: "Concede on the fourth", nextStepId: "end-concede" }
+        ]
+      },
+      {
+        id: "challenge",
+        text: "You ask the crow what jurisdiction it represents. It tilts its head, which legally counts as a citation.",
+        choices: [
+          { label: "Apologize and proceed", nextStepId: "end-apologize" },
+          { label: "Continue with dignity", nextStepId: "end-dignity-crow" }
+        ]
+      },
+      {
+        id: "bribe",
+        text: "You offer half a cracker. The crow examines it from multiple angles before pocketing it in a way you cannot quite see.",
+        choices: [
+          { label: "Add a piece of foil", nextStepId: "end-foil" },
+          { label: "Stop while you are ahead", nextStepId: "end-stop" }
+        ]
+      },
+      {
+        id: "end-third",
+        text: "Your defense of the third tea is moving. The crow notes it was a brave purchase.",
+        ending: "It marks the audit closed with a small pencil."
+      },
+      {
+        id: "end-concede",
+        text: "You admit the fourth tea was excessive. The crow is gracious.",
+        ending: "It says forgiveness is part of its training."
+      },
+      {
+        id: "end-apologize",
+        text: "Your apology is sincere. The crow accepts and provides verbal absolution.",
+        ending: "The receipt floats away on the breeze."
+      },
+      {
+        id: "end-dignity-crow",
+        text: "You continue answering questions while standing slightly straighter. It changes nothing but feels right.",
+        ending: "The audit will be reviewed by a higher crow next year."
+      },
+      {
+        id: "end-foil",
+        text: "The foil seals the deal. The crow performs a small approving hop.",
+        ending: "You are cleared. The cracker was the legal one. The foil was friendship."
+      },
+      {
+        id: "end-stop",
+        text: "You decide not to overdo it. The crow respects this.",
+        ending: "Negotiations end on a quiet, professional note."
+      }
+    ]
   }
 ];

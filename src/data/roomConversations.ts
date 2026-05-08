@@ -604,5 +604,455 @@ export const roomConversations: RoomConversation[] = [
         text: "Most ambition retracts eventually."
       }
     ]
+  },
+  {
+    id: "kai-lamp-flicker",
+    pairId: "kai-mina",
+    topic: "The lamp that flickered like it forgot something",
+    texture: "cozy",
+    tags: ["cozy", "night", "object-drama"],
+    lines: [
+      {
+        speaker: "Mina",
+        text: "The lamp just flickered. I think it lost its train of thought."
+      },
+      {
+        speaker: "Kai",
+        text: "Lamps lead simple lives. Forgetting one bulb's whole job is a real setback."
+      },
+      {
+        speaker: "Mina",
+        text: "Be patient with it. It is doing the best it remembers."
+      },
+      {
+        speaker: "Kai",
+        text: "We will pretend nothing happened. That is usually polite."
+      }
+    ]
+  },
+  {
+    id: "kai-restless-book",
+    pairId: "kai-mina",
+    topic: "A book that keeps falling open to the same page",
+    texture: "domestic",
+    tags: ["weird", "object-drama", "domestic"],
+    lines: [
+      {
+        speaker: "Kai",
+        text: "The book on the table keeps opening to the same page on its own."
+      },
+      {
+        speaker: "Mina",
+        text: "Maybe page 47 is its favorite. Books are allowed favorites."
+      },
+      {
+        speaker: "Kai",
+        text: "Or it has reached an opinion and would like the room to know."
+      },
+      {
+        speaker: "Mina",
+        text: "Then we have to read it. It will not relax until we have."
+      }
+    ]
+  },
+  {
+    id: "kai-kettle-cough",
+    pairId: "kai-mina",
+    topic: "The kettle clearing its throat before saying something",
+    texture: "hummed",
+    tags: ["cozy", "domestic", "quiet"],
+    lines: [
+      {
+        speaker: "Mina",
+        text: "The kettle made that small noise again. Like it is about to start a speech."
+      },
+      {
+        speaker: "Kai",
+        text: "It clears its throat for ten minutes before the boil. Slow speaker."
+      },
+      {
+        speaker: "Mina",
+        text: "Maybe it will finally tell us what it has been thinking about all year."
+      },
+      {
+        speaker: "Kai",
+        text: "If it is good, we will write it down."
+      }
+    ]
+  },
+  {
+    id: "kai-cabinet-rumor",
+    pairId: "kai-mina",
+    topic: "A plant that lives entirely on cabinet rumors",
+    texture: "weird",
+    tags: ["weird", "domestic", "absurd"],
+    lines: [
+      {
+        speaker: "Mina",
+        text: "I am convinced the plant is listening to the cabinets again."
+      },
+      {
+        speaker: "Kai",
+        text: "It only thrives on gossip. Water makes it suspicious."
+      },
+      {
+        speaker: "Mina",
+        text: "The cabinets must have said something nice today. Look at it."
+      },
+      {
+        speaker: "Kai",
+        text: "Yes. It looks vindicated."
+      }
+    ]
+  },
+  {
+    id: "kai-window-letter",
+    pairId: "kai-mina",
+    topic: "Window condensation drafting a resignation letter",
+    texture: "soft",
+    tags: ["quiet", "rain", "object-drama"],
+    lines: [
+      {
+        speaker: "Kai",
+        text: "The window has fogged up in a long uneven shape. Looks like a letter being drafted."
+      },
+      {
+        speaker: "Mina",
+        text: "Resignation. Definitely. From the cold side."
+      },
+      {
+        speaker: "Kai",
+        text: "Reasonable. It has been mistreated by every breeze this week."
+      },
+      {
+        speaker: "Mina",
+        text: "We should let it cool down. Some letters are better unsent."
+      }
+    ]
+  },
+  {
+    id: "kai-toaster-confidence",
+    pairId: "kai-mina",
+    topic: "The late-night confidence of the toaster",
+    texture: "warm",
+    tags: ["night", "absurd", "object-drama"],
+    lines: [
+      {
+        speaker: "Mina",
+        text: "The toaster is unusually confident at this hour."
+      },
+      {
+        speaker: "Kai",
+        text: "It thinks the kitchen is asleep. It is auditioning for something larger."
+      },
+      {
+        speaker: "Mina",
+        text: "Maybe it wants to be a small heater. Or a tiny stage."
+      },
+      {
+        speaker: "Kai",
+        text: "We should watch quietly. Career growth is sensitive in appliances."
+      }
+    ]
+  },
+  {
+    id: "jules-doorknob-interviews",
+    pairId: "jules-nori",
+    topic: "A doorknob holding interviews for who gets to leave",
+    texture: "domestic",
+    tags: ["object-drama", "domestic", "weird"],
+    lines: [
+      {
+        speaker: "Nori",
+        text: "The doorknob seems to be deciding who is allowed out today."
+      },
+      {
+        speaker: "Jules",
+        text: "It has been turning slower. Like it is reviewing applications."
+      },
+      {
+        speaker: "Nori",
+        text: "I will bring it a small cover letter just in case."
+      },
+      {
+        speaker: "Jules",
+        text: "Make it warm. Doorknobs respect warmth more than qualifications."
+      }
+    ]
+  },
+  {
+    id: "jules-radiator-confessions",
+    pairId: "jules-nori",
+    topic: "The radiator confessing private things in code",
+    texture: "hummed",
+    tags: ["cozy", "night", "quiet"],
+    lines: [
+      {
+        speaker: "Jules",
+        text: "The radiator is making those small clicks again."
+      },
+      {
+        speaker: "Nori",
+        text: "I think it is confessing. Each click is a thing it never told the building."
+      },
+      {
+        speaker: "Jules",
+        text: "Then we should listen with respect. We will not understand any of it."
+      },
+      {
+        speaker: "Nori",
+        text: "That is usually how confessions go best."
+      }
+    ]
+  },
+  {
+    id: "jules-scarf-opinion",
+    pairId: "jules-nori",
+    topic: "A scarf that has begun forming opinions",
+    texture: "soft",
+    tags: ["weird", "domestic", "object-drama"],
+    lines: [
+      {
+        speaker: "Nori",
+        text: "The blue scarf has been folded the same way for months. It has developed a stance."
+      },
+      {
+        speaker: "Jules",
+        text: "On what."
+      },
+      {
+        speaker: "Nori",
+        text: "On weather. It seems unimpressed by today."
+      },
+      {
+        speaker: "Jules",
+        text: "Maybe it is right. We could be doing more with this afternoon."
+      }
+    ]
+  },
+  {
+    id: "jules-receipt-residency",
+    pairId: "jules-nori",
+    topic: "A receipt that has applied for permanent residency",
+    texture: "domestic",
+    tags: ["absurd", "object-drama", "domestic"],
+    lines: [
+      {
+        speaker: "Jules",
+        text: "There is a receipt on the counter that has been there for a week."
+      },
+      {
+        speaker: "Nori",
+        text: "It has applied for residency. The counter is processing it."
+      },
+      {
+        speaker: "Jules",
+        text: "What did it buy."
+      },
+      {
+        speaker: "Nori",
+        text: "Two limes and a feeling. The feeling has expired."
+      }
+    ]
+  },
+  {
+    id: "jules-umbrella-stand",
+    pairId: "jules-nori",
+    topic: "An umbrella stand running for a small office",
+    texture: "absurd",
+    tags: ["absurd", "weird", "domestic"],
+    lines: [
+      {
+        speaker: "Nori",
+        text: "The umbrella stand is presenting itself differently today."
+      },
+      {
+        speaker: "Jules",
+        text: "Slightly more upright. Yes."
+      },
+      {
+        speaker: "Nori",
+        text: "I think it is running for hallway president."
+      },
+      {
+        speaker: "Jules",
+        text: "Its platform is reasonable. I might vote."
+      }
+    ]
+  },
+  {
+    id: "jules-emotional-drawer",
+    pairId: "jules-nori",
+    topic: "A drawer organizing itself by feelings",
+    texture: "cozy",
+    tags: ["cozy", "domestic", "quiet"],
+    lines: [
+      {
+        speaker: "Jules",
+        text: "I opened the drawer and it had reorganized itself overnight."
+      },
+      {
+        speaker: "Nori",
+        text: "By what system."
+      },
+      {
+        speaker: "Jules",
+        text: "Mood. The hopeful pens are at the front. The tired batteries are in the back."
+      },
+      {
+        speaker: "Nori",
+        text: "That is a real filing system. We should leave it alone."
+      }
+    ]
+  },
+  {
+    id: "ada-fan-philosophy",
+    pairId: "ada-sol",
+    topic: "The ceiling fan reaching a slow philosophical moment",
+    texture: "soft",
+    tags: ["quiet", "night", "absurd"],
+    lines: [
+      {
+        speaker: "Ada",
+        text: "The ceiling fan has slowed to a thinking speed."
+      },
+      {
+        speaker: "Sol",
+        text: "It does this around midnight. It works on one question at a time."
+      },
+      {
+        speaker: "Ada",
+        text: "What is tonight's."
+      },
+      {
+        speaker: "Sol",
+        text: "Whether the room owes it overtime. The conclusion will be quiet."
+      }
+    ]
+  },
+  {
+    id: "ada-pen-union",
+    pairId: "ada-sol",
+    topic: "A small union forming inside the pen jar",
+    texture: "domestic",
+    tags: ["object-drama", "weird", "absurd"],
+    lines: [
+      {
+        speaker: "Sol",
+        text: "The pens have arranged themselves by ink color again. That is suspicious."
+      },
+      {
+        speaker: "Ada",
+        text: "I think they are organizing. The blue ones are speaking for the others."
+      },
+      {
+        speaker: "Sol",
+        text: "What do they want."
+      },
+      {
+        speaker: "Ada",
+        text: "More important documents. Less list-making."
+      }
+    ]
+  },
+  {
+    id: "ada-tuesday-denial",
+    pairId: "ada-sol",
+    topic: "A calendar in light denial about Tuesday",
+    texture: "absurd",
+    tags: ["absurd", "weird", "domestic"],
+    lines: [
+      {
+        speaker: "Ada",
+        text: "The calendar is still showing yesterday. It is choosing to."
+      },
+      {
+        speaker: "Sol",
+        text: "Some Tuesdays do not deserve acknowledgement."
+      },
+      {
+        speaker: "Ada",
+        text: "We could turn the page for it."
+      },
+      {
+        speaker: "Sol",
+        text: "We could. Or we could let the calendar have its little protest."
+      }
+    ]
+  },
+  {
+    id: "ada-bookshelf-low",
+    pairId: "ada-sol",
+    topic: "Bookshelf gossiping at frequencies too low for humans",
+    texture: "hummed",
+    tags: ["quiet", "weird", "object-drama"],
+    lines: [
+      {
+        speaker: "Sol",
+        text: "I keep feeling the bookshelf is talking about me."
+      },
+      {
+        speaker: "Ada",
+        text: "It might be. But its voice is below human hearing. We will never know what."
+      },
+      {
+        speaker: "Sol",
+        text: "Probably nothing serious."
+      },
+      {
+        speaker: "Ada",
+        text: "Probably not. The cookbooks would have intervened."
+      }
+    ]
+  },
+  {
+    id: "ada-mirror-silence",
+    pairId: "ada-sol",
+    topic: "The mirror keeping a professional silence",
+    texture: "soft",
+    tags: ["quiet", "night"],
+    lines: [
+      {
+        speaker: "Ada",
+        text: "The mirror has not commented on anything tonight."
+      },
+      {
+        speaker: "Sol",
+        text: "Mirrors are paid in stillness. They never speak unless legally required."
+      },
+      {
+        speaker: "Ada",
+        text: "It is dignified work."
+      },
+      {
+        speaker: "Sol",
+        text: "Yes. We should not interrupt it by checking our hair."
+      }
+    ]
+  },
+  {
+    id: "ada-teacup-empire",
+    pairId: "ada-sol",
+    topic: "A teacup that has survived a small empire",
+    texture: "cozy",
+    tags: ["cozy", "domestic", "quiet"],
+    lines: [
+      {
+        speaker: "Sol",
+        text: "This teacup has been in the cabinet for years. It has outlasted at least two of my plans."
+      },
+      {
+        speaker: "Ada",
+        text: "It has the patience of something that knew the plans would not work."
+      },
+      {
+        speaker: "Sol",
+        text: "I do not appreciate the implication."
+      },
+      {
+        speaker: "Ada",
+        text: "The teacup does not appreciate complaints either."
+      }
+    ]
   }
 ];

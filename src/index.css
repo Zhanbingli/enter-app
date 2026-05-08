@@ -37,6 +37,30 @@ button {
     linear-gradient(135deg, #f7f0e7 0%, #efe1d1 100%);
 }
 
+.soft-room {
+  background-image:
+    radial-gradient(circle at 18% 8%, rgba(232, 232, 240, 0.88), transparent 36%),
+    radial-gradient(circle at 82% 12%, rgba(70, 92, 105, 0.18), transparent 30%),
+    radial-gradient(circle at 78% 82%, rgba(60, 80, 95, 0.16), transparent 34%),
+    linear-gradient(135deg, #e8e6e0 0%, #d6d3cc 100%);
+}
+
+.soft-story {
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(255, 250, 242, 0.92), transparent 34%),
+    radial-gradient(circle at 78% 16%, rgba(201, 130, 99, 0.20), transparent 30%),
+    radial-gradient(circle at 82% 84%, rgba(180, 120, 80, 0.16), transparent 32%),
+    linear-gradient(135deg, #f5e9d8 0%, #e8d2b2 100%);
+}
+
+.soft-mission {
+  background-image:
+    radial-gradient(circle at 20% 12%, rgba(245, 240, 230, 0.90), transparent 35%),
+    radial-gradient(circle at 78% 14%, rgba(127, 149, 113, 0.20), transparent 30%),
+    radial-gradient(circle at 80% 86%, rgba(110, 130, 100, 0.16), transparent 32%),
+    linear-gradient(135deg, #eef1e6 0%, #d8dccf 100%);
+}
+
 .enter {
   animation: enter 280ms ease both;
 }
@@ -64,5 +88,19 @@ button {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter,
+  .float-in {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
   }
 }

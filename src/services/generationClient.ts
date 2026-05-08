@@ -6,6 +6,7 @@ import type {
   StupidMission,
   TinyStory
 } from "../types";
+import { track } from "./analytics";
 
 type GenerationKind = "room" | "story" | "mission";
 
@@ -22,7 +23,6 @@ type GenerationRequest =
     }
   | {
       kind: "mission";
-      weird?: boolean;
       avoidMission?: string;
     };
 
@@ -61,6 +61,10 @@ async function requestGeneration(kind: GenerationKind, body: GenerationRequest) 
 
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), 9000);
+  const startedAt = Date.now();
+  let ok = false;
+  let result: unknown = null;
+  let failureReason: string | undefined;
 
   try {
     const response = await fetch("/api/generate", {
@@ -71,16 +75,35 @@ async function requestGeneration(kind: GenerationKind, body: GenerationRequest) 
     });
 
     if (!response.ok) {
-      return null;
+      failureReason = `http_${response.status}`;
+    } else {
+      const payload = (await response.json()) as {
+        kind?: string;
+        result?: unknown;
+      };
+      if (payload.kind === kind && payload.result) {
+        result = payload.result;
+        ok = true;
+      } else {
+        failureReason = "empty_result";
+      }
     }
-
-    const payload = (await response.json()) as { kind?: string; result?: unknown };
-    return payload.kind === kind ? payload.result ?? null : null;
-  } catch {
-    return null;
+  } catch (error) {
+    failureReason =
+      error instanceof DOMException && error.name === "AbortError"
+        ? "timeout"
+        : "network_error";
   } finally {
     window.clearTimeout(timeoutId);
+    track("generation_attempt", {
+      kind,
+      ms: Date.now() - startedAt,
+      ok,
+      ...(failureReason ? { reason: failureReason } : {})
+    });
   }
+
+  return result;
 }
 
 export async function generateRoomConversation(
@@ -174,29 +197,20 @@ export async function generateTinyStory(
 }
 
 export async function generateMission(
-  weird: boolean,
   avoidMission?: string
 ): Promise<StupidMission | null> {
   const result = await requestGeneration("mission", {
     kind: "mission",
-    weird,
     avoidMission
   });
 
-  if (
-    !isRecord(result) ||
-    !isString(result.mission) ||
-    !isString(result.weirderMission) ||
-    !isString(result.doneResponse)
-  ) {
+  if (!isRecord(result) || !isString(result.mission)) {
     return null;
   }
 
   return {
     id: isString(result.id) ? result.id : `generated-mission-${Date.now()}`,
     mission: result.mission,
-    weirderMission: result.weirderMission,
-    doneResponse: result.doneResponse,
     source: "generated"
   };
 }

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { stupidMissions } from "../data/stupidMissions";
+import { useEscape } from "../hooks/useEscape";
+import { track, useTrackMode } from "../services/analytics";
 import { generateMission } from "../services/generationClient";
 import { randomItem, randomItemExcept } from "../utils/random";
-import { PrimaryButton } from "./PrimaryButton";
-import { SecondaryButton } from "./SecondaryButton";
 
 type MissionModeProps = {
   onBack: () => void;
@@ -11,77 +11,59 @@ type MissionModeProps = {
 
 export function MissionMode({ onBack }: MissionModeProps) {
   const [mission, setMission] = useState(() => randomItem(stupidMissions));
-  const [isWeird, setIsWeird] = useState(false);
-  const [isDone, setIsDone] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  async function skipMission() {
-    setIsGenerating(true);
-    const generatedMission = await generateMission(isWeird, mission.mission);
-    setMission(generatedMission ?? randomItemExcept(stupidMissions, mission.id));
-    setIsWeird(false);
-    setIsDone(false);
-    setIsGenerating(false);
-  }
+  useTrackMode("mission");
+  useEscape(onBack);
 
-  function makeWeirder() {
-    setIsWeird(true);
-    setIsDone(false);
+  async function nextMission() {
+    setIsLoading(true);
+    const fromId = mission.id;
+    try {
+      const generated = await generateMission(mission.mission);
+      const next = generated ?? randomItemExcept(stupidMissions, mission.id);
+      setMission(next);
+      track("another_tap", {
+        mode: "mission",
+        fromId,
+        toId: next.id,
+        source: generated ? "generated" : "local"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-5 py-6 sm:px-8 sm:py-10">
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <button
-          className="text-sm font-semibold text-ink/56 transition hover:text-ink"
-          onClick={onBack}
-        >
-          Back
-        </button>
-        <span className="rounded-full border border-ink/10 bg-cream/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-ink/48">
-          Stupid Mission
-        </span>
-      </div>
-
-      <section
-        key={`${mission.id}-${isWeird ? "weird" : "plain"}`}
-        className="enter my-auto rounded-lg border border-ink/10 bg-cream/88 p-6 shadow-soft backdrop-blur sm:p-8"
-      >
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-moss">
-          Tiny real-world mission
-        </p>
-        <h1 className="mt-5 text-4xl font-semibold leading-tight text-ink sm:text-6xl">
-          {isWeird ? mission.weirderMission : mission.mission}
-        </h1>
-
-        {isDone ? (
-          <div className="float-in mt-7 border-t border-ink/10 pt-5">
-            <p className="text-lg font-semibold leading-8 text-cocoa">
-              {mission.doneResponse}
-            </p>
-          </div>
-        ) : null}
-
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <PrimaryButton className="sm:flex-1" onClick={() => setIsDone(true)}>
-            Done
-          </PrimaryButton>
-          <SecondaryButton
-            className="sm:flex-1"
-            onClick={() => void skipMission()}
-            disabled={isGenerating}
+    <div className="soft-mission min-h-screen">
+      <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 py-8 sm:px-8 sm:py-10">
+        <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-ink/35">
+          <button
+            className="inline-flex min-h-11 items-center px-2 py-2 transition hover:text-ink"
+            onClick={onBack}
           >
-            {isGenerating ? "Finding..." : "Skip"}
-          </SecondaryButton>
-          <SecondaryButton
-            className="sm:flex-1"
-            onClick={makeWeirder}
-            disabled={isWeird}
+            back
+          </button>
+          <button
+            className="inline-flex min-h-11 items-center px-2 py-2 transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
+            onClick={() => void nextMission()}
+            disabled={isLoading}
           >
-            Make it weirder
-          </SecondaryButton>
+            another
+          </button>
         </div>
-      </section>
-    </main>
+
+        <section
+          key={mission.id}
+          className={`enter my-auto transition-opacity duration-500 ${
+            isLoading ? "opacity-40" : "opacity-100"
+          }`}
+        >
+          <p className="text-2xl font-medium leading-snug text-ink sm:text-3xl">
+            {mission.mission}
+          </p>
+        </section>
+      </main>
+    </div>
   );
 }
