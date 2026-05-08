@@ -3,19 +3,24 @@ import type { ConversationLine } from "../types";
 type ConversationBubbleProps = {
   line: ConversationLine;
   index: number;
+  align: "left" | "right";
 };
 
-export function ConversationBubble({ line, index }: ConversationBubbleProps) {
-  const isKai = line.speaker === "Kai";
+export function ConversationBubble({
+  line,
+  index,
+  align
+}: ConversationBubbleProps) {
+  const isLeft = align === "left";
 
   return (
     <div
-      className={`float-in flex ${isKai ? "justify-start" : "justify-end"}`}
+      className={`float-in flex ${isLeft ? "justify-start" : "justify-end"}`}
       style={{ animationDelay: `${index * 70}ms` }}
     >
       <div
         className={`max-w-[88%] rounded-lg border px-4 py-3 shadow-sm sm:max-w-[74%] ${
-          isKai
+          isLeft
             ? "border-tide/20 bg-white/70"
             : "border-clay/20 bg-[#fff3e7]/86"
         }`}

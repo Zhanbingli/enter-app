@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { stupidMissions } from "../data/stupidMissions";
+import { generateMission } from "../services/generationClient";
 import { randomItem, randomItemExcept } from "../utils/random";
 import { PrimaryButton } from "./PrimaryButton";
 import { SecondaryButton } from "./SecondaryButton";
@@ -12,11 +13,15 @@ export function MissionMode({ onBack }: MissionModeProps) {
   const [mission, setMission] = useState(() => randomItem(stupidMissions));
   const [isWeird, setIsWeird] = useState(false);
   const [isDone, setIsDone] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  function skipMission() {
-    setMission(randomItemExcept(stupidMissions, mission.id));
+  async function skipMission() {
+    setIsGenerating(true);
+    const generatedMission = await generateMission(isWeird, mission.mission);
+    setMission(generatedMission ?? randomItemExcept(stupidMissions, mission.id));
     setIsWeird(false);
     setIsDone(false);
+    setIsGenerating(false);
   }
 
   function makeWeirder() {
@@ -61,8 +66,12 @@ export function MissionMode({ onBack }: MissionModeProps) {
           <PrimaryButton className="sm:flex-1" onClick={() => setIsDone(true)}>
             Done
           </PrimaryButton>
-          <SecondaryButton className="sm:flex-1" onClick={skipMission}>
-            Skip
+          <SecondaryButton
+            className="sm:flex-1"
+            onClick={() => void skipMission()}
+            disabled={isGenerating}
+          >
+            {isGenerating ? "Finding..." : "Skip"}
           </SecondaryButton>
           <SecondaryButton
             className="sm:flex-1"

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { tinyStories } from "../data/tinyStories";
+import { generateTinyStory } from "../services/generationClient";
 import type { TinyStory } from "../types";
 import { randomItem, randomItemExcept } from "../utils/random";
 import { PrimaryButton } from "./PrimaryButton";
@@ -16,16 +17,20 @@ function getStartStep(story: TinyStory) {
 export function TinyStoryMode({ onBack }: TinyStoryModeProps) {
   const [story, setStory] = useState(() => randomItem(tinyStories));
   const [stepId, setStepId] = useState(() => story.startStepId);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const currentStep = useMemo(
     () => story.steps.find((step) => step.id === stepId) ?? getStartStep(story),
     [story, stepId]
   );
 
-  function newStory() {
-    const nextStory = randomItemExcept(tinyStories, story.id);
+  async function newStory() {
+    setIsGenerating(true);
+    const generatedStory = await generateTinyStory(story.title);
+    const nextStory = generatedStory ?? randomItemExcept(tinyStories, story.id);
     setStory(nextStory);
     setStepId(nextStory.startStepId);
+    setIsGenerating(false);
   }
 
   return (
@@ -72,11 +77,12 @@ export function TinyStoryMode({ onBack }: TinyStoryModeProps) {
               {choice.label}
             </SecondaryButton>
           ))}
-          {!currentStep.choices ? (
-            <PrimaryButton onClick={newStory}>New story</PrimaryButton>
-          ) : (
-            <PrimaryButton onClick={newStory}>New story</PrimaryButton>
-          )}
+          <PrimaryButton
+            onClick={() => void newStory()}
+            disabled={isGenerating}
+          >
+            {isGenerating ? "Finding..." : "New story"}
+          </PrimaryButton>
         </div>
       </section>
     </main>

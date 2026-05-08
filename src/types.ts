@@ -1,7 +1,7 @@
 export type Mode = "home" | "room" | "story" | "mission";
 
 export type Character = {
-  name: "Kai" | "Mina";
+  name: string;
   personality: string;
 };
 
@@ -13,15 +13,30 @@ export type CharacterPair = {
 };
 
 export type ConversationLine = {
-  speaker: "Kai" | "Mina";
+  speaker: string;
   text: string;
 };
 
+export type RoomTone = "regular" | "quiet" | "weird";
+
+export type RoomTopicTag =
+  | "quiet"
+  | "weird"
+  | "cozy"
+  | "domestic"
+  | "night"
+  | "rain"
+  | "object-drama"
+  | "absurd";
+
 export type RoomConversation = {
   id: string;
+  pairId: string;
   topic: string;
   texture: string;
+  tags: RoomTopicTag[];
   lines: ConversationLine[];
+  source?: "local" | "generated";
 };
 
 export type StoryChoice = {
@@ -42,6 +57,7 @@ export type TinyStory = {
   scenario: string;
   startStepId: string;
   steps: StoryStep[];
+  source?: "local" | "generated";
 };
 
 export type StupidMission = {
@@ -49,4 +65,5 @@ export type StupidMission = {
   mission: string;
   weirderMission: string;
   doneResponse: string;
+  source?: "local" | "generated";
 };
