@@ -3,8 +3,9 @@ import { tinyStories } from "../data/tinyStories";
 import { useEscape } from "../hooks/useEscape";
 import { track, useTrackMode } from "../services/analytics";
 import { generateTinyStory } from "../services/generationClient";
+import { getLastSeen, setLastSeen } from "../services/lastSeen";
 import type { TinyStory } from "../types";
-import { randomItem, randomItemExcept } from "../utils/random";
+import { randomItemExcept } from "../utils/random";
 
 type TinyStoryModeProps = {
   onBack: () => void;
@@ -15,7 +16,11 @@ function getStartStep(story: TinyStory) {
 }
 
 export function TinyStoryMode({ onBack }: TinyStoryModeProps) {
-  const [story, setStory] = useState(() => randomItem(tinyStories));
+  const [story, setStory] = useState<TinyStory>(() => {
+    const next = randomItemExcept(tinyStories, getLastSeen("story"));
+    setLastSeen("story", next.id);
+    return next;
+  });
   const [stepId, setStepId] = useState(() => story.startStepId);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -52,6 +57,7 @@ export function TinyStoryMode({ onBack }: TinyStoryModeProps) {
       const next = generated ?? randomItemExcept(tinyStories, story.id);
       setStory(next);
       setStepId(next.startStepId);
+      setLastSeen("story", next.id);
       track("another_tap", {
         mode: "story",
         fromId,
@@ -71,7 +77,7 @@ export function TinyStoryMode({ onBack }: TinyStoryModeProps) {
             className="inline-flex min-h-11 items-center px-2 py-2 transition hover:text-ink"
             onClick={onBack}
           >
-            back
+            off
           </button>
           <button
             className="inline-flex min-h-11 items-center px-2 py-2 transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"

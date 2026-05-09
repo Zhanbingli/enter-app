@@ -3,14 +3,19 @@ import { stupidMissions } from "../data/stupidMissions";
 import { useEscape } from "../hooks/useEscape";
 import { track, useTrackMode } from "../services/analytics";
 import { generateMission } from "../services/generationClient";
-import { randomItem, randomItemExcept } from "../utils/random";
+import { getLastSeen, setLastSeen } from "../services/lastSeen";
+import { randomItemExcept } from "../utils/random";
 
 type MissionModeProps = {
   onBack: () => void;
 };
 
 export function MissionMode({ onBack }: MissionModeProps) {
-  const [mission, setMission] = useState(() => randomItem(stupidMissions));
+  const [mission, setMission] = useState(() => {
+    const next = randomItemExcept(stupidMissions, getLastSeen("mission"));
+    setLastSeen("mission", next.id);
+    return next;
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   useTrackMode("mission");
@@ -23,6 +28,7 @@ export function MissionMode({ onBack }: MissionModeProps) {
       const generated = await generateMission(mission.mission);
       const next = generated ?? randomItemExcept(stupidMissions, mission.id);
       setMission(next);
+      setLastSeen("mission", next.id);
       track("another_tap", {
         mode: "mission",
         fromId,
@@ -42,7 +48,7 @@ export function MissionMode({ onBack }: MissionModeProps) {
             className="inline-flex min-h-11 items-center px-2 py-2 transition hover:text-ink"
             onClick={onBack}
           >
-            back
+            off
           </button>
           <button
             className="inline-flex min-h-11 items-center px-2 py-2 transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"

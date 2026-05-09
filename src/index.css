@@ -3,12 +3,42 @@
 @tailwind utilities;
 
 :root {
-  color: #2f2b27;
-  background: #f7f0e7;
+  --color-paper: 247 240 231;
+  --color-ink: 47 43 39;
+  --color-clay: 201 130 99;
+  --color-moss: 127 149 113;
+  --color-tide: 111 146 155;
+  --color-cocoa: 95 74 61;
+  --color-cream: 255 250 242;
+
+  color: rgb(var(--color-ink));
+  background: rgb(var(--color-paper));
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: 26 24 22;
+    --color-ink: 232 226 215;
+    --color-clay: 198 132 102;
+    --color-moss: 138 158 124;
+    --color-tide: 122 152 162;
+    --color-cocoa: 196 172 152;
+    --color-cream: 245 238 226;
+  }
+}
+
+:root[data-late] {
+  --color-paper: 26 24 22;
+  --color-ink: 232 226 215;
+  --color-clay: 198 132 102;
+  --color-moss: 138 158 124;
+  --color-tide: 122 152 162;
+  --color-cocoa: 196 172 152;
+  --color-cream: 245 238 226;
 }
 
 * {
@@ -59,6 +89,66 @@ button {
     radial-gradient(circle at 78% 14%, rgba(127, 149, 113, 0.20), transparent 30%),
     radial-gradient(circle at 80% 86%, rgba(110, 130, 100, 0.16), transparent 32%),
     linear-gradient(135deg, #eef1e6 0%, #d8dccf 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .soft-noise {
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(255, 240, 220, 0.06), transparent 36%),
+      radial-gradient(circle at 76% 14%, rgba(111, 146, 155, 0.14), transparent 32%),
+      radial-gradient(circle at 80% 86%, rgba(127, 149, 113, 0.12), transparent 34%),
+      linear-gradient(135deg, #1a1815 0%, #14110f 100%);
+  }
+  .soft-room {
+    background-image:
+      radial-gradient(circle at 18% 8%, rgba(180, 200, 220, 0.07), transparent 38%),
+      radial-gradient(circle at 82% 12%, rgba(70, 92, 105, 0.22), transparent 32%),
+      radial-gradient(circle at 78% 82%, rgba(60, 80, 95, 0.18), transparent 36%),
+      linear-gradient(135deg, #161a1d 0%, #11141a 100%);
+  }
+  .soft-story {
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(255, 240, 220, 0.06), transparent 36%),
+      radial-gradient(circle at 78% 16%, rgba(201, 130, 99, 0.18), transparent 32%),
+      radial-gradient(circle at 82% 84%, rgba(180, 120, 80, 0.14), transparent 34%),
+      linear-gradient(135deg, #1c1612 0%, #15100c 100%);
+  }
+  .soft-mission {
+    background-image:
+      radial-gradient(circle at 20% 12%, rgba(220, 230, 200, 0.05), transparent 36%),
+      radial-gradient(circle at 78% 14%, rgba(127, 149, 113, 0.18), transparent 32%),
+      radial-gradient(circle at 80% 86%, rgba(110, 130, 100, 0.14), transparent 34%),
+      linear-gradient(135deg, #161a14 0%, #10130e 100%);
+  }
+}
+
+:root[data-late] .soft-noise {
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(255, 240, 220, 0.06), transparent 36%),
+    radial-gradient(circle at 76% 14%, rgba(111, 146, 155, 0.14), transparent 32%),
+    radial-gradient(circle at 80% 86%, rgba(127, 149, 113, 0.12), transparent 34%),
+    linear-gradient(135deg, #1a1815 0%, #14110f 100%);
+}
+:root[data-late] .soft-room {
+  background-image:
+    radial-gradient(circle at 18% 8%, rgba(180, 200, 220, 0.07), transparent 38%),
+    radial-gradient(circle at 82% 12%, rgba(70, 92, 105, 0.22), transparent 32%),
+    radial-gradient(circle at 78% 82%, rgba(60, 80, 95, 0.18), transparent 36%),
+    linear-gradient(135deg, #161a1d 0%, #11141a 100%);
+}
+:root[data-late] .soft-story {
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(255, 240, 220, 0.06), transparent 36%),
+    radial-gradient(circle at 78% 16%, rgba(201, 130, 99, 0.18), transparent 32%),
+    radial-gradient(circle at 82% 84%, rgba(180, 120, 80, 0.14), transparent 34%),
+    linear-gradient(135deg, #1c1612 0%, #15100c 100%);
+}
+:root[data-late] .soft-mission {
+  background-image:
+    radial-gradient(circle at 20% 12%, rgba(220, 230, 200, 0.05), transparent 36%),
+    radial-gradient(circle at 78% 14%, rgba(127, 149, 113, 0.18), transparent 32%),
+    radial-gradient(circle at 80% 86%, rgba(110, 130, 100, 0.14), transparent 34%),
+    linear-gradient(135deg, #161a14 0%, #10130e 100%);
 }
 
 .enter {

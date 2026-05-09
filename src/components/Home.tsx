@@ -44,6 +44,10 @@ export function Home({ onSelectMode }: HomeProps) {
             onSelect={onSelectMode}
           />
         </section>
+
+        <p className="mt-12 text-xs uppercase tracking-[0.18em] text-ink/30">
+          esc anywhere to step out
+        </p>
       </main>
     </div>
   );

@@ -5,6 +5,7 @@ import { useAmbientSound } from "../hooks/useAmbientSound";
 import { useEscape } from "../hooks/useEscape";
 import { track, useTrackMode } from "../services/analytics";
 import { generateRoomConversation } from "../services/generationClient";
+import { getLastSeen, setLastSeen } from "../services/lastSeen";
 import type {
   CharacterPair,
   ConversationLine,
@@ -12,7 +13,7 @@ import type {
   RoomTone,
   RoomTopicTag
 } from "../types";
-import { randomItem, randomItemExcept } from "../utils/random";
+import { randomItemExcept } from "../utils/random";
 import { ConversationBubble } from "./ConversationBubble";
 
 type RoomModeProps = {
@@ -67,7 +68,11 @@ function pickConversation(
 }
 
 export function RoomMode({ onOff }: RoomModeProps) {
-  const [pair] = useState<CharacterPair>(() => randomItem(characterPairs));
+  const [pair] = useState<CharacterPair>(() => {
+    const next = randomItemExcept(characterPairs, getLastSeen("roomPair"));
+    setLastSeen("roomPair", next.id);
+    return next;
+  });
   const [tone, setTone] = useState<RoomTone>(getInitialTone);
   const [conversation, setConversation] = useState<RoomConversation>(() =>
     pickConversation(pair.id, getInitialTone(), undefined, getTimeHint())

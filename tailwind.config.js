@@ -4,13 +4,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        paper: "#f7f0e7",
-        ink: "#2f2b27",
-        clay: "#c98263",
-        moss: "#7f9571",
-        tide: "#6f929b",
-        cocoa: "#5f4a3d",
-        cream: "#fffaf2"
+        paper: "rgb(var(--color-paper) / <alpha-value>)",
+        ink: "rgb(var(--color-ink) / <alpha-value>)",
+        clay: "rgb(var(--color-clay) / <alpha-value>)",
+        moss: "rgb(var(--color-moss) / <alpha-value>)",
+        tide: "rgb(var(--color-tide) / <alpha-value>)",
+        cocoa: "rgb(var(--color-cocoa) / <alpha-value>)",
+        cream: "rgb(var(--color-cream) / <alpha-value>)"
       },
       boxShadow: {
         soft: "0 24px 80px rgba(76, 57, 42, 0.13)"
