@@ -80,7 +80,7 @@ export function RoomMode({ onOff }: RoomModeProps) {
   const [lineIndex, setLineIndex] = useState(0);
   const [streamLines, setStreamLines] = useState<StreamLine[]>([]);
   const [isToneLoading, setIsToneLoading] = useState(false);
-  const { startSound, stopSound } = useAmbientSound();
+  const { startSound, stopSound, setTone: setAmbientTone } = useAmbientSound();
 
   const lineLimit = useMemo(
     () =>
@@ -100,10 +100,14 @@ export function RoomMode({ onOff }: RoomModeProps) {
   useEscape(leaveRoom);
 
   useEffect(() => {
-    void startSound();
+    void startSound(tone);
     return () => stopSound();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    setAmbientTone(tone);
+  }, [tone, setAmbientTone]);
 
   useEffect(() => {
     if (isAtEnd || isToneLoading) return;
