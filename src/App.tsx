@@ -1,10 +1,39 @@
-import { useState } from "react";
+import { lazy, Suspense, useCallback, useState } from "react";
 import { DebugView } from "./components/DebugView";
 import { Home } from "./components/Home";
-import { MissionMode } from "./components/MissionMode";
-import { RoomMode } from "./components/RoomMode";
-import { TinyStoryMode } from "./components/TinyStoryMode";
 import type { Mode } from "./types";
+
+// document.startViewTransition is widely supported in 2026 (Chromium since
+// 111, Safari since 18.2) but graceful-degrades to a plain state swap on
+// older browsers and in reduced-motion mode.
+type ViewTransitionDoc = Document & {
+  startViewTransition?: (cb: () => void) => unknown;
+};
+
+function withViewTransition(swap: () => void) {
+  const doc = typeof document !== "undefined" ? document : null;
+  const prefersReduced =
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const vtDoc = doc as ViewTransitionDoc | null;
+  if (!vtDoc?.startViewTransition || prefersReduced) {
+    swap();
+    return;
+  }
+  vtDoc.startViewTransition(swap);
+}
+
+const RoomMode = lazy(() =>
+  import("./components/RoomMode").then((m) => ({ default: m.RoomMode }))
+);
+const TinyStoryMode = lazy(() =>
+  import("./components/TinyStoryMode").then((m) => ({
+    default: m.TinyStoryMode
+  }))
+);
+const MissionMode = lazy(() =>
+  import("./components/MissionMode").then((m) => ({ default: m.MissionMode }))
+);
 
 function App() {
   const [isDebug] = useState(() => {
@@ -14,6 +43,10 @@ function App() {
     );
   });
   const [mode, setMode] = useState<Mode>("home");
+
+  const navigate = useCallback((next: Mode) => {
+    withViewTransition(() => setMode(next));
+  }, []);
 
   if (isDebug) {
     return (
@@ -25,14 +58,16 @@ function App() {
 
   return (
     <div className="min-h-screen text-ink">
-      {mode === "home" ? <Home onSelectMode={setMode} /> : null}
-      {mode === "room" ? <RoomMode onOff={() => setMode("home")} /> : null}
-      {mode === "story" ? (
-        <TinyStoryMode onBack={() => setMode("home")} />
-      ) : null}
-      {mode === "mission" ? (
-        <MissionMode onBack={() => setMode("home")} />
-      ) : null}
+      {mode === "home" ? <Home onSelectMode={navigate} /> : null}
+      <Suspense fallback={<div className="min-h-screen" />}>
+        {mode === "room" ? <RoomMode onOff={() => navigate("home")} /> : null}
+        {mode === "story" ? (
+          <TinyStoryMode onBack={() => navigate("home")} />
+        ) : null}
+        {mode === "mission" ? (
+          <MissionMode onBack={() => navigate("home")} />
+        ) : null}
+      </Suspense>
     </div>
   );
 }

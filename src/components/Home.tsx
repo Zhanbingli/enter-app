@@ -1,3 +1,7 @@
+import { useEffect, useState } from "react";
+import { getCurrentMoment } from "../services/moments";
+import { getOpener } from "../services/timeBand";
+import { getReturningPhrase, recordVisit } from "../services/visitor";
 import type { Mode } from "../types";
 import { ModeCard } from "./ModeCard";
 
@@ -6,12 +10,20 @@ type HomeProps = {
 };
 
 export function Home({ onSelectMode }: HomeProps) {
+  const [opener] = useState(
+    () => getCurrentMoment()?.opener ?? getReturningPhrase() ?? getOpener()
+  );
+
+  useEffect(() => {
+    recordVisit();
+  }, []);
+
   return (
     <div className="soft-noise min-h-screen">
       <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-5 py-10 sm:px-8">
         <section className="enter max-w-3xl">
-          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-cocoa/55">
-            Ambient mischief
+          <p className="mb-4 text-sm font-medium lowercase tracking-[0.18em] text-cocoa/55">
+            {opener}
           </p>
           <h1 className="max-w-2xl text-4xl font-semibold leading-[1.05] text-ink sm:text-6xl">
             What kind of boredom is this?

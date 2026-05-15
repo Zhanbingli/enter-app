@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { playClick } from "../audio/feedback";
 import { stupidMissions } from "../data/stupidMissions";
 import { useEscape } from "../hooks/useEscape";
 import { track, useTrackMode } from "../services/analytics";
@@ -19,9 +20,16 @@ export function MissionMode({ onBack }: MissionModeProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   useTrackMode("mission");
-  useEscape(onBack);
+
+  function exit() {
+    playClick("off");
+    onBack();
+  }
+
+  useEscape(exit);
 
   async function nextMission() {
+    playClick("tap");
     setIsLoading(true);
     const fromId = mission.id;
     try {
@@ -46,7 +54,7 @@ export function MissionMode({ onBack }: MissionModeProps) {
         <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-ink/35">
           <button
             className="inline-flex min-h-11 items-center px-2 py-2 transition hover:text-ink"
-            onClick={onBack}
+            onClick={exit}
           >
             off
           </button>

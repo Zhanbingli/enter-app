@@ -1,3 +1,5 @@
+import { unlockAudio } from "../audio/context";
+import { playClick } from "../audio/feedback";
 import type { Mode } from "../types";
 
 type ModeCardProps = {
@@ -24,7 +26,13 @@ export function ModeCard({
   return (
     <button
       className="group flex min-h-44 w-full flex-col justify-between rounded-lg border border-ink/10 bg-cream/82 p-6 text-left shadow-soft backdrop-blur transition duration-200 hover:-translate-y-1 hover:border-ink/20 hover:bg-cream focus:outline-none focus:ring-2 focus:ring-clay focus:ring-offset-2 focus:ring-offset-paper"
-      onClick={() => onSelect(mode)}
+      onClick={() => {
+        // iOS Safari needs the AudioContext to be resumed inside a user
+        // gesture — Room's later useEffect is past that gesture window.
+        void unlockAudio();
+        playClick("tap");
+        onSelect(mode);
+      }}
     >
       <span
         className={`h-2.5 w-12 rounded-full ${accentClasses[accent]} transition duration-200 group-hover:w-16`}

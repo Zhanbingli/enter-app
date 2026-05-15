@@ -65,6 +65,31 @@ button {
     radial-gradient(circle at 76% 14%, rgba(111, 146, 155, 0.18), transparent 30%),
     radial-gradient(circle at 80% 86%, rgba(127, 149, 113, 0.19), transparent 32%),
     linear-gradient(135deg, #f7f0e7 0%, #efe1d1 100%);
+  transition: background-image 1200ms ease;
+}
+
+/* Subtle time-of-day tints on Home. deep-night/late already get the dark
+   treatment via :root[data-late] further down. */
+:root[data-band="dawn"] .soft-noise {
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(255, 245, 240, 0.92), transparent 34%),
+    radial-gradient(circle at 78% 18%, rgba(180, 170, 200, 0.22), transparent 30%),
+    radial-gradient(circle at 80% 86%, rgba(210, 180, 170, 0.18), transparent 32%),
+    linear-gradient(135deg, #f6ece4 0%, #ecd9d3 100%);
+}
+:root[data-band="dusk"] .soft-noise {
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(255, 240, 220, 0.94), transparent 34%),
+    radial-gradient(circle at 78% 16%, rgba(220, 140, 90, 0.22), transparent 32%),
+    radial-gradient(circle at 80% 86%, rgba(180, 110, 70, 0.18), transparent 32%),
+    linear-gradient(135deg, #f5e1c8 0%, #e6c098 100%);
+}
+:root[data-band="evening"] .soft-noise {
+  background-image:
+    radial-gradient(circle at 20% 12%, rgba(245, 225, 200, 0.88), transparent 34%),
+    radial-gradient(circle at 76% 14%, rgba(160, 100, 80, 0.22), transparent 30%),
+    radial-gradient(circle at 80% 86%, rgba(120, 95, 75, 0.18), transparent 32%),
+    linear-gradient(135deg, #ead8c0 0%, #d4b496 100%);
 }
 
 .soft-room {
@@ -90,6 +115,7 @@ button {
     radial-gradient(circle at 80% 86%, rgba(110, 130, 100, 0.16), transparent 32%),
     linear-gradient(135deg, #eef1e6 0%, #d8dccf 100%);
 }
+
 
 @media (prefers-color-scheme: dark) {
   .soft-noise {
@@ -159,6 +185,28 @@ button {
   animation: float-in 360ms ease both;
 }
 
+/* A thin hairline that fades in a few seconds after a story ending lands —
+   the visual full-stop. Tiny, easy to miss; that's the point. */
+.ending-mark {
+  margin: 2.5rem auto 0;
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0;
+  animation: ending-mark-in 1400ms ease 4200ms both;
+}
+
+@keyframes ending-mark-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0.3);
+  }
+  to {
+    opacity: 0.35;
+    transform: scaleX(1);
+  }
+}
+
 @keyframes enter {
   from {
     opacity: 0;
@@ -192,5 +240,36 @@ button {
   *::after {
     transition-duration: 0ms !important;
     animation-duration: 0ms !important;
+  }
+}
+
+/* Mode transitions feel like stepping through a doorway: the outgoing room
+   fades to the paper-colored body, the incoming room fades up from it. The
+   slight scale gives a barely-felt camera dolly. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: mood-vt-out;
+}
+
+::view-transition-new(root) {
+  animation-name: mood-vt-in;
+}
+
+@keyframes mood-vt-out {
+  to {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+
+@keyframes mood-vt-in {
+  from {
+    opacity: 0;
+    transform: scale(1.015);
   }
 }

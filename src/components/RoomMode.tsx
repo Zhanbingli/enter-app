@@ -1,14 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { playClick } from "../audio/feedback";
 import { characterPairs } from "../data/characters";
 import { roomConversations } from "../data/roomConversations";
 import { useAmbientSound } from "../hooks/useAmbientSound";
 import { useEscape } from "../hooks/useEscape";
+import { useRoomStream } from "../hooks/useRoomStream";
 import { track, useTrackMode } from "../services/analytics";
 import { generateRoomConversation } from "../services/generationClient";
 import { getLastSeen, setLastSeen } from "../services/lastSeen";
 import type {
   CharacterPair,
-  ConversationLine,
   RoomConversation,
   RoomTone,
   RoomTopicTag
@@ -19,13 +20,6 @@ import { ConversationBubble } from "./ConversationBubble";
 type RoomModeProps = {
   onOff: () => void;
 };
-
-type StreamLine = ConversationLine & {
-  key: string;
-  align: "left" | "right";
-};
-
-const STREAM_CAP = 6;
 
 function getTimeHint(): RoomTopicTag | undefined {
   const hour = new Date().getHours();
@@ -77,21 +71,18 @@ export function RoomMode({ onOff }: RoomModeProps) {
   const [conversation, setConversation] = useState<RoomConversation>(() =>
     pickConversation(pair.id, getInitialTone(), undefined, getTimeHint())
   );
-  const [lineIndex, setLineIndex] = useState(0);
-  const [streamLines, setStreamLines] = useState<StreamLine[]>([]);
   const [isToneLoading, setIsToneLoading] = useState(false);
   const { startSound, stopSound, setTone: setAmbientTone } = useAmbientSound();
 
-  const lineLimit = useMemo(
-    () =>
-      tone === "quiet"
-        ? Math.min(3, conversation.lines.length)
-        : conversation.lines.length,
-    [tone, conversation.lines.length]
-  );
-  const isAtEnd = lineIndex >= lineLimit;
+  const { streamLines, isAtEnd } = useRoomStream({
+    pair,
+    tone,
+    conversation,
+    paused: isToneLoading
+  });
 
   function leaveRoom() {
+    playClick("off");
     stopSound();
     onOff();
   }
@@ -108,38 +99,6 @@ export function RoomMode({ onOff }: RoomModeProps) {
   useEffect(() => {
     setAmbientTone(tone);
   }, [tone, setAmbientTone]);
-
-  useEffect(() => {
-    if (isAtEnd || isToneLoading) return;
-    const pace = tone === "quiet" ? 6500 : tone === "weird" ? 4500 : 5500;
-    const delay = streamLines.length === 0 ? 250 : pace;
-    const timer = window.setTimeout(() => {
-      const line = conversation.lines[lineIndex];
-      setStreamLines((prev) => {
-        const next: StreamLine = {
-          speaker: line.speaker,
-          text: line.text,
-          align:
-            line.speaker === pair.characterA.name ? "left" : "right",
-          key: `${conversation.id}-${lineIndex}`
-        };
-        const updated = [...prev, next];
-        return updated.length > STREAM_CAP
-          ? updated.slice(-STREAM_CAP)
-          : updated;
-      });
-      setLineIndex((i) => i + 1);
-    }, delay);
-    return () => window.clearTimeout(timer);
-  }, [
-    isAtEnd,
-    isToneLoading,
-    lineIndex,
-    tone,
-    conversation,
-    pair,
-    streamLines.length
-  ]);
 
   useEffect(() => {
     if (!isAtEnd || isToneLoading) return;
@@ -164,10 +123,10 @@ export function RoomMode({ onOff }: RoomModeProps) {
       generated ??
       pickConversation(pair.id, nextTone, conversation.id, getTimeHint());
     setConversation(next);
-    setLineIndex(0);
   }
 
   async function changeTone(nextTone: RoomTone) {
+    playClick("toggle");
     track("room_tone_change", { from: tone, to: nextTone });
     setIsToneLoading(true);
     try {
