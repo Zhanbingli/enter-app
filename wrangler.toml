@@ -1,0 +1,19 @@
+name = "mood-room"
+compatibility_date = "2025-01-15"
+pages_build_output_dir = "dist"
+
+# Non-secret defaults. Override per-environment in the Cloudflare dashboard
+# if you want different caps for preview vs production.
+[vars]
+DEEPSEEK_MODEL = "deepseek-chat"
+DEEPSEEK_BASE_URL = "https://api.deepseek.com"
+DAILY_TOKEN_BUDGET = "800000"
+RATE_LIMIT_PER_HOUR = "60"
+CACHE_TTL_SECONDS = "900"
+
+# KV namespace for budget counters, rate limit buckets, and response cache.
+# Create with:  wrangler kv namespace create MOOD_KV
+# then paste the id below.
+[[kv_namespaces]]
+binding = "MOOD_KV"
+id = "PASTE_KV_NAMESPACE_ID_HERE"
