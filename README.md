@@ -1,6 +1,6 @@
-# Mood Room MVP
+# Mood Room
 
-A mood-based ambient companion for bored, lonely, or tired moments.
+A quiet place to land for five minutes, for bored, lonely, or tired moments.
 
 > Open this when you are bored, lonely, or tired, but do not want to scroll
 > short videos or force yourself to socialize.

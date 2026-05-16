@@ -116,6 +116,56 @@ button {
     linear-gradient(135deg, #eef1e6 0%, #d8dccf 100%);
 }
 
+/* Rain window — the hidden room. Cool grey-blue, layered streak animation. */
+.soft-rain {
+  background-image:
+    radial-gradient(circle at 18% 8%, rgba(220, 230, 240, 0.85), transparent 38%),
+    radial-gradient(circle at 82% 14%, rgba(70, 90, 110, 0.20), transparent 32%),
+    radial-gradient(circle at 78% 84%, rgba(50, 70, 90, 0.18), transparent 36%),
+    linear-gradient(180deg, #c8d0d8 0%, #a8b4c0 100%);
+  position: relative;
+}
+
+.rain-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.65;
+  background-image: repeating-linear-gradient(
+    102deg,
+    transparent 0 86px,
+    rgba(190, 210, 230, 0.16) 86px 87px,
+    transparent 87px 124px,
+    rgba(190, 210, 230, 0.10) 124px 125px,
+    transparent 125px 168px,
+    rgba(190, 210, 230, 0.12) 168px 169px
+  );
+  background-size: 320px 220px;
+  animation: rain-fall-slow 850ms linear infinite;
+}
+
+.rain-layer-2 {
+  opacity: 0.45;
+  background-image: repeating-linear-gradient(
+    105deg,
+    transparent 0 130px,
+    rgba(180, 200, 220, 0.10) 130px 131px,
+    transparent 131px 220px
+  );
+  background-size: 420px 180px;
+  animation: rain-fall-fast 520ms linear infinite;
+}
+
+@keyframes rain-fall-slow {
+  from { background-position: 0 0; }
+  to { background-position: -64px 220px; }
+}
+
+@keyframes rain-fall-fast {
+  from { background-position: 0 0; }
+  to { background-position: -42px 180px; }
+}
 
 @media (prefers-color-scheme: dark) {
   .soft-noise {
@@ -175,6 +225,24 @@ button {
     radial-gradient(circle at 78% 14%, rgba(127, 149, 113, 0.18), transparent 32%),
     radial-gradient(circle at 80% 86%, rgba(110, 130, 100, 0.14), transparent 34%),
     linear-gradient(135deg, #161a14 0%, #10130e 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .soft-rain {
+    background-image:
+      radial-gradient(circle at 18% 8%, rgba(180, 200, 220, 0.06), transparent 38%),
+      radial-gradient(circle at 82% 12%, rgba(80, 100, 120, 0.22), transparent 32%),
+      radial-gradient(circle at 78% 82%, rgba(40, 60, 80, 0.18), transparent 36%),
+      linear-gradient(180deg, #1a1f24 0%, #11161c 100%);
+  }
+}
+
+:root[data-late] .soft-rain {
+  background-image:
+    radial-gradient(circle at 18% 8%, rgba(180, 200, 220, 0.06), transparent 38%),
+    radial-gradient(circle at 82% 12%, rgba(80, 100, 120, 0.22), transparent 32%),
+    radial-gradient(circle at 78% 82%, rgba(40, 60, 80, 0.18), transparent 36%),
+    linear-gradient(180deg, #1a1f24 0%, #11161c 100%);
 }
 
 .enter {

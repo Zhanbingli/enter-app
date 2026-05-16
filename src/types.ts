@@ -1,4 +1,4 @@
-export type Mode = "home" | "room" | "story" | "mission";
+export type Mode = "home" | "room" | "story" | "mission" | "rain";
 
 export type Character = {
   name: string;

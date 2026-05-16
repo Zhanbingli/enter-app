@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { recordSession } from "./sessions";
 
 export type AnalyticsEvent = {
   type: string;
@@ -61,10 +62,9 @@ export function useTrackMode(mode: string) {
     const enteredAt = Date.now();
     track("mode_enter", { mode });
     return () => {
-      track("mode_leave", {
-        mode,
-        durationMs: Date.now() - enteredAt
-      });
+      const durationMs = Date.now() - enteredAt;
+      track("mode_leave", { mode, durationMs });
+      recordSession(durationMs);
     };
   }, [mode]);
 }

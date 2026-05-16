@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { unlockAudio } from "../audio/context";
+import { playClick } from "../audio/feedback";
 import { getCurrentMoment } from "../services/moments";
+import { isRainUnlocked } from "../services/sessions";
 import { getOpener } from "../services/timeBand";
 import { getReturningPhrase, recordVisit } from "../services/visitor";
 import type { Mode } from "../types";
@@ -13,6 +16,7 @@ export function Home({ onSelectMode }: HomeProps) {
   const [opener] = useState(
     () => getCurrentMoment()?.opener ?? getReturningPhrase() ?? getOpener()
   );
+  const [rainUnlocked] = useState(() => isRainUnlocked());
 
   useEffect(() => {
     recordVisit();
@@ -56,6 +60,19 @@ export function Home({ onSelectMode }: HomeProps) {
             onSelect={onSelectMode}
           />
         </section>
+
+        {rainUnlocked ? (
+          <button
+            className="mt-10 self-start text-sm italic lowercase tracking-wide text-ink/55 transition hover:text-ink"
+            onClick={() => {
+              void unlockAudio();
+              playClick("tap");
+              onSelectMode("rain");
+            }}
+          >
+            — the window is open.
+          </button>
+        ) : null}
 
         <p className="mt-12 text-xs uppercase tracking-[0.18em] text-ink/30">
           esc anywhere to step out

@@ -34,6 +34,9 @@ const TinyStoryMode = lazy(() =>
 const MissionMode = lazy(() =>
   import("./components/MissionMode").then((m) => ({ default: m.MissionMode }))
 );
+const RainMode = lazy(() =>
+  import("./components/RainMode").then((m) => ({ default: m.RainMode }))
+);
 
 function App() {
   const [isDebug] = useState(() => {
@@ -66,6 +69,9 @@ function App() {
         ) : null}
         {mode === "mission" ? (
           <MissionMode onBack={() => navigate("home")} />
+        ) : null}
+        {mode === "rain" ? (
+          <RainMode onBack={() => navigate("home")} />
         ) : null}
       </Suspense>
     </div>
