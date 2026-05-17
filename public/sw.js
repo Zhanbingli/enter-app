@@ -2,7 +2,7 @@
 // All app content is bundled — the network is only needed for /api/generate,
 // which has its own local fallback.
 
-const CACHE_NAME = "mood-room-v2";
+const CACHE_NAME = "mood-room-v3";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -11,7 +11,7 @@ const APP_SHELL = [
   "/icon-192.png",
   "/icon-512.png",
   "/apple-touch-icon.png",
-  "/og.svg"
+  "/og.png"
 ];
 
 self.addEventListener("install", (event) => {
