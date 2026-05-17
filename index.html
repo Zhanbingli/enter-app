@@ -46,6 +46,15 @@
       rel="stylesheet"
     />
     <title>What kind of boredom is this?</title>
+    <style>
+      /* Critical inline styles — applied before the main CSS bundle loads
+         so the first paint is the paper color, not a white flash. */
+      html, body { margin: 0; background: #f7f0e7; color: #2f2b27; min-height: 100vh; }
+      @media (prefers-color-scheme: dark) {
+        html, body { background: #1a1815; color: #e8e2d7; }
+      }
+      html[data-late] body { background: #1a1815; color: #e8e2d7; }
+    </style>
   </head>
   <body>
     <div id="root"></div>

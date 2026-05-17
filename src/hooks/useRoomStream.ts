@@ -13,6 +13,10 @@ export type StreamLine = {
 };
 
 const STREAM_CAP = 6;
+// Before the first line drips, give the room ~3.5s of empty ambient sound so
+// the user lands in a place that already exists. The conversation comes after
+// you've sat down.
+const ROOM_SETTLE_MS = 3500;
 
 type UseRoomStreamOptions = {
   pair: CharacterPair;
@@ -50,7 +54,15 @@ export function useRoomStream({
 
   useEffect(() => {
     if (isAtEnd || paused) return;
-    const delay = streamLines.length === 0 ? 250 : pacingFor(tone);
+    // Only the very first line of a session waits the full settle period.
+    // Subsequent conversation switches inherit the regular tone pacing so
+    // the room doesn't fall silent in the middle of an evening.
+    const isFirstLineEver = streamLines.length === 0;
+    const delay = isFirstLineEver
+      ? ROOM_SETTLE_MS
+      : lineIndex === 0
+        ? Math.min(pacingFor(tone), 2000)
+        : pacingFor(tone);
     const timer = window.setTimeout(() => {
       const line = conversation.lines[lineIndex];
       setStreamLines((prev) => {

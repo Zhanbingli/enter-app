@@ -63,7 +63,7 @@ export function Home({ onSelectMode }: HomeProps) {
 
         {rainUnlocked ? (
           <button
-            className="mt-10 self-start text-sm italic lowercase tracking-wide text-ink/55 transition hover:text-ink"
+            className="rain-hint mt-10 self-start text-sm italic lowercase tracking-wide text-ink/55 transition hover:text-ink"
             onClick={() => {
               void unlockAudio();
               playClick("tap");

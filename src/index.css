@@ -253,6 +253,23 @@ button {
   animation: float-in 360ms ease both;
 }
 
+/* The hidden rain hint appears for the first time the day a user crosses
+   the unlock threshold — let it surface slowly so the user notices. */
+.rain-hint {
+  animation: rain-hint-in 1200ms ease 400ms both;
+}
+
+@keyframes rain-hint-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* A thin hairline that fades in a few seconds after a story ending lands —
    the visual full-stop. Tiny, easy to miss; that's the point. */
 .ending-mark {
