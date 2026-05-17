@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { unlockAudio } from "../audio/context";
 import { playClick } from "../audio/feedback";
+import { useEavesdrop } from "../hooks/useEavesdrop";
 import { getCurrentMoment } from "../services/moments";
 import { isRainUnlocked } from "../services/sessions";
 import { getOpener } from "../services/timeBand";
@@ -17,6 +18,7 @@ export function Home({ onSelectMode }: HomeProps) {
     () => getCurrentMoment()?.opener ?? getReturningPhrase() ?? getOpener()
   );
   const [rainUnlocked] = useState(() => isRainUnlocked());
+  const eavesdrop = useEavesdrop();
 
   useEffect(() => {
     recordVisit();
@@ -78,6 +80,17 @@ export function Home({ onSelectMode }: HomeProps) {
           esc anywhere to step out
         </p>
       </main>
+
+      {eavesdrop ? (
+        <aside
+          key={eavesdrop.id}
+          className="eavesdrop"
+          aria-hidden
+        >
+          <span className="eavesdrop-speaker">{eavesdrop.speaker.toLowerCase()}</span>
+          <span className="eavesdrop-text">{eavesdrop.text}</span>
+        </aside>
+      ) : null}
     </div>
   );
 }

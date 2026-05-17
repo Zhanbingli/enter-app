@@ -270,6 +270,58 @@ button {
   }
 }
 
+/* Eavesdropping Home — a single overheard line drifts at the bottom of the
+   page. Felt rather than read. The wow moment: someone said something
+   before you decided to be here. */
+.eavesdrop {
+  position: fixed;
+  bottom: 7vh;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(560px, 88vw);
+  text-align: center;
+  pointer-events: none;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  animation: eavesdrop-cycle 7500ms ease both;
+}
+
+.eavesdrop-speaker {
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  color: rgb(var(--color-cocoa) / 0.6);
+}
+
+.eavesdrop-text {
+  font-family: "Lora", Georgia, serif;
+  font-style: italic;
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: rgb(var(--color-ink) / 0.62);
+}
+
+@keyframes eavesdrop-cycle {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  82% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -6px);
+  }
+}
+
 /* A thin hairline that fades in a few seconds after a story ending lands —
    the visual full-stop. Tiny, easy to miss; that's the point. */
 .ending-mark {

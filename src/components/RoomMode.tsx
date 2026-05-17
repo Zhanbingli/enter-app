@@ -6,6 +6,7 @@ import { useAmbientSound } from "../hooks/useAmbientSound";
 import { useEscape } from "../hooks/useEscape";
 import { useRoomStream } from "../hooks/useRoomStream";
 import { track, useTrackMode } from "../services/analytics";
+import { takeEavesdropPair } from "../services/eavesdrop";
 import { generateRoomConversation } from "../services/generationClient";
 import { getLastSeen, setLastSeen } from "../services/lastSeen";
 import type {
@@ -63,7 +64,13 @@ function pickConversation(
 
 export function RoomMode({ onOff }: RoomModeProps) {
   const [pair] = useState<CharacterPair>(() => {
-    const next = randomItemExcept(characterPairs, getLastSeen("roomPair"));
+    // If the user was just overhearing this pair on Home, enter their room.
+    const fromHome = takeEavesdropPair();
+    const carried = fromHome
+      ? characterPairs.find((p) => p.id === fromHome)
+      : undefined;
+    const next =
+      carried ?? randomItemExcept(characterPairs, getLastSeen("roomPair"));
     setLastSeen("roomPair", next.id);
     return next;
   });
