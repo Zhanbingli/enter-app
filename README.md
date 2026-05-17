@@ -2,6 +2,8 @@
 
 A quiet place to land for five minutes, for bored, lonely, or tired moments.
 
+→ Live: **<https://mood-room.pages.dev>**
+
 > Open this when you are bored, lonely, or tired, but do not want to scroll
 > short videos or force yourself to socialize.
 
@@ -15,7 +17,7 @@ The home screen asks one question:
 
 > What kind of boredom is this?
 
-You pick a state. There are three modes.
+You pick a state. There are three modes on the surface, and a hidden fourth.
 
 ### Room
 
@@ -24,15 +26,21 @@ them. There is no input box. No chatbot loop. No prompts asking for your
 participation.
 
 - Three character pairs: Kai/Mina, Jules/Nori, Ada/Sol
+- The first line waits ~3.5 seconds so the room exists before the
+  conversation starts
 - Lines drip in slowly, with longer gaps between conversations
 - Stream rolls over: only the most recent six lines stay on screen, older
   lines fade upward
-- Initial tone and topic pool are biased by local hour (late night → quieter,
-  morning → cozy, evening → domestic)
+- Tone and topic pool are biased by local hour and the current time band
+  (late night → quieter, morning → cozy, evening → domestic)
 - Tap `quieter` or `weirder` at the bottom to nudge the vibe; the room
   smoothly transitions
-- Soft ambient bed: two filtered sines plus pink noise, with a slow LFO so it
-  breathes. Auto-starts when you enter Room
+- Procedural ambient bed: two filtered sines plus pink noise + fridge hum,
+  with a slow LFO so the room breathes. Sparse stereo-panned textures
+  (kettle, keyboard clicks, paper rustle, cup placement, floor creaks)
+  arrive on a tone-aware schedule
+- Master gain and inter-texture gap scale by time band — deep-night is
+  60% gain and 1.6× gap; dawn is brighter; afternoon is full
 
 ### Tiny Story
 
@@ -41,8 +49,10 @@ choices. Most stories take 1–3 minutes. There are 17 hand-written stories,
 each with several endings.
 
 - Lora serif typography to feel more like a paperback than a UI
-- The story ends quietly with an italicized closing line, separated by a hair
-  rule. No achievement, no celebration
+- Endings get a 28px hairline that fades in 4 seconds after the closing
+  italic line lands — a visual full-stop
+- After an ending, `another` is hidden for 6 seconds so the closing line
+  gets its silent moment. `off` stays clickable
 
 ### Stupid Mission
 
@@ -55,6 +65,56 @@ already in. Examples:
 
 There is no streak, no points, no review screen. Just a mission and an
 `another` button.
+
+### A fourth room
+
+There is one more mode. It does not appear in the grid. After a few
+real sessions it shows up as a single line below the cards, italicized,
+no fanfare. Try the app for a while.
+
+## The opening seconds
+
+Home is not a menu. It's a room you're already in.
+
+About 5 seconds after the page lands, a single italic line of dialogue
+fades in at the bottom — a stranger you have not met saying something
+about a window or a spoon. It holds, fades, comes back ~18 seconds later.
+
+When you click `the room feels too quiet`, you enter the room of the
+same pair you were overhearing. Continuity, not menu navigation.
+
+## Atmosphere details
+
+Things most apps do not bother with. Listed here because cumulatively
+they are the product.
+
+- **Time-of-day awareness across the whole app.** A 7-band classification
+  (`deep-night / dawn / morning / afternoon / dusk / evening / late`) keys
+  off the local hour and is exposed as `<html data-band>`. The Home opener
+  phrase rotates by band ("still up." / "before the kettle." / "the room
+  has settled."), Home's background subtly tints by band, and the audio
+  bed scales gain and texture frequency by band.
+- **Returning-visitor opener.** The app remembers when you last opened it.
+  Within an hour it says nothing. Same day → "back already." Few days →
+  "back." Weeks → "two weeks, easy." Long time → "look who's back."
+  Priority chain on Home: special moment > returning > band.
+- **Time-moment easter eggs.** 11:11 → "11:11, somewhere." The minute
+  around midnight → "tomorrow, almost." Friday evening → "it's friday,
+  somewhere." Sunday afternoon → "the long sunday."
+- **Cinematic mode swap.** Mode transitions use the View Transitions API:
+  the outgoing room fades and scales 0.985, the incoming room fades up
+  from 1.015. Feels like stepping through a doorway. Graceful-degrades
+  on older browsers and `prefers-reduced-motion`.
+- **Tactile click feedback.** Three click voices via the singleton
+  AudioContext: `tap` (1.1kHz triangle pulse, mode card / story choice),
+  `off` (420Hz sine, lamp-click for every exit), `toggle` (760Hz, room
+  tone changes). Plus a 5–8ms `navigator.vibrate` on supported devices.
+  Silent under reduced-motion or before the AudioContext is unlocked.
+- **iOS audio unlock.** Singleton AudioContext resumed inside the
+  ModeCard click handler — fixes iOS Safari's autoplay policy killing
+  Room audio.
+- **First-paint fix.** Inline critical CSS so the very first frame is
+  the paper color, not the default white flash before the bundle loads.
 
 ## What this app deliberately does not have
 
@@ -69,13 +129,15 @@ The whole product surface is a switch, not a platform.
 
 ## Stack
 
-- React 18 + TypeScript
+- React 19 + TypeScript, code-split per mode via `React.lazy`
 - Vite 6
 - Tailwind CSS 3
-- Local content data with optional DeepSeek-backed generation
-- Web Audio API for the ambient sound bed
+- Web Audio API for the procedural ambient bed + click feedback
+- Cloudflare Pages + Pages Function for production hosting and the
+  `/api/generate` endpoint (optional DeepSeek-backed generation)
 - localStorage-backed event log + a hidden debug view
-- Minimal PWA (manifest, SVG icon, pass-through service worker)
+- PWA: manifest, PNG + SVG icons, service worker with cache-first static
+  + network-first navigation
 
 ## Run locally
 
@@ -93,11 +155,39 @@ npm run build      # tsc --noEmit && vite build
 npm run preview    # serve the production build
 ```
 
+## Deploy (Cloudflare Pages)
+
+The live site runs on Cloudflare Pages. The Pages Function at
+`functions/api/generate.ts` handles AI generation with KV-backed daily
+token budget, per-IP rate limit, and short-TTL response cache.
+
+```bash
+npm install -D wrangler
+
+# one-time setup
+npx wrangler login
+npx wrangler kv namespace create MOOD_KV   # paste the id into wrangler.toml
+npx wrangler pages project create mood-room --production-branch main
+
+# (optional) enable AI generation by setting the secret
+npx wrangler pages secret put DEEPSEEK_API_KEY --project-name mood-room
+
+# deploy
+npm run build
+npx wrangler pages deploy dist --project-name mood-room --branch main
+```
+
+The product works without `DEEPSEEK_API_KEY` — the function returns 204
+and the frontend silently uses the local content pool. AI is a bonus,
+not a dependency.
+
 ## Optional AI generation
 
 By default the app runs entirely on local content and needs no API key.
 Generation can be turned on for richer Room conversations, Story branches,
 and Missions.
+
+For local dev:
 
 ```bash
 cp .env.example .env
@@ -113,32 +203,29 @@ VITE_USE_AI_GENERATION=true
 
 How it works:
 
-- The browser never sees `DEEPSEEK_API_KEY`. It is read only by the Vite
-  middleware in `vite.config.ts`.
-- The frontend always calls a local `/api/generate` endpoint. The middleware
-  forwards to `https://api.deepseek.com/chat/completions` using
+- The browser never sees `DEEPSEEK_API_KEY`. In dev it is read only by the
+  Vite middleware; in production it is a Pages secret read only by the
+  Function.
+- The frontend always calls `/api/generate`. The server side
+  (dev middleware or Pages Function) forwards to DeepSeek using
   `response_format: { type: "json_object" }`.
-- If generation is disabled, fails, times out, or returns malformed JSON, the
-  app silently falls back to the local content pool. Failure is invisible to
-  the user.
-- The default model is `deepseek-chat`. `deepseek-reasoner` works but tends
-  to over-think playful content and is slower and more expensive.
-- An optional `DEEPSEEK_BASE_URL` env var can point at any
-  OpenAI-protocol-compatible proxy or self-hosted endpoint.
+- If generation is disabled, fails, times out, or returns malformed JSON,
+  the app silently falls back to the local content pool. Failure is
+  invisible to the user.
+- The Pages Function adds a daily token budget circuit breaker
+  (default 800K tokens / UTC day), a per-IP hourly rate limit
+  (default 60/hour), and a short-TTL response cache (default 15 min)
+  so identical requests share one upstream call.
 
-> Vite reads `.env` only at process start. After editing `.env`, restart
-> `npm run dev` and hard-reload the browser tab so the new
-> `VITE_USE_AI_GENERATION` value gets baked into the client bundle.
-
-For production deployment the dev middleware needs to be moved to a real
-backend or a serverless function. Never expose the model API key in the
-client bundle.
+The shared prompt + DeepSeek wiring lives in `server/generation.ts`.
+Defaults like `DAILY_TOKEN_BUDGET`, `RATE_LIMIT_PER_HOUR`, and
+`CACHE_TTL_SECONDS` are configured in `wrangler.toml`.
 
 ## Hidden debug view
 
 Append `?debug=events` to the URL:
 
-<http://127.0.0.1:5173/?debug=events>
+<https://mood-room.pages.dev/?debug=events>
 
 Shows:
 
@@ -150,29 +237,30 @@ Shows:
 The log is stored in `localStorage` (`mood-room.events`, capped at 500
 entries). Tracked events include `mode_enter` / `mode_leave`,
 `room_tone_change`, `room_auto_advance`, `story_choice`, `story_ending`,
-`another_tap`, and `generation_attempt`. Useful for figuring out which mode
-is actually held the longest before swapping in real analytics.
+`another_tap`, and `generation_attempt`.
 
 ## PWA
 
-A minimal manifest plus a small SVG icon make the app installable.
+A manifest plus PNG and SVG icons make the app installable.
 
 - Chrome / Edge mobile shows an "install" prompt
 - iOS Safari: Share → Add to Home Screen, opens in standalone, no URL bar
-- The current service worker is a no-op pass-through (it exists so the app
-  meets installability criteria; offline strategy can be layered on later)
-
-A real PNG icon set is still TODO; the SVG is fine on Chrome/Edge but iOS
-sometimes falls back to a generic glyph.
+- Service worker is cache-first for static assets and network-first for
+  navigations, with the full app shell precached so it works offline
 
 ## Keyboard
 
-`Esc` exits any mode back to Home.
+`Esc` exits any mode back to Home. Same click voice as the `off` button.
 
 ## Reduced motion
 
-If the operating system sets `prefers-reduced-motion: reduce`, all enter
-animations and CSS transitions are disabled.
+If the operating system sets `prefers-reduced-motion: reduce`:
+
+- Enter animations and CSS transitions are disabled
+- View Transitions API is bypassed
+- Click audio + haptic feedback is suppressed
+- The drifting Home eavesdrop is not rendered at all (drifting text is
+  exactly the kind of background motion the setting is meant to disable)
 
 ## Project structure
 
@@ -180,26 +268,43 @@ animations and CSS transitions are disabled.
 .
 ├── index.html
 ├── package.json
-├── vite.config.ts            # also hosts the dev /api/generate middleware
+├── vite.config.ts            # dev /api/generate middleware
+├── wrangler.toml             # Cloudflare Pages config + KV binding
 ├── tailwind.config.js
 ├── postcss.config.js
 ├── tsconfig.json
 ├── .env.example
+├── .dev.vars.example         # for `wrangler pages dev`
+├── server
+│   └── generation.ts         # shared DeepSeek prompts + API call
+├── functions
+│   └── api
+│       └── generate.ts       # production Pages Function
 ├── public
 │   ├── manifest.webmanifest
 │   ├── icon.svg
+│   ├── icon-192.png
+│   ├── icon-512.png
+│   ├── apple-touch-icon.png
+│   ├── og.png
+│   ├── og.svg
 │   └── sw.js
 └── src
     ├── App.tsx
     ├── main.tsx
     ├── index.css
     ├── types.ts
+    ├── audio
+    │   ├── context.ts        # singleton AudioContext + iOS unlock
+    │   ├── feedback.ts       # click voices (tap / off / toggle)
+    │   └── textures.ts       # procedural Room sound textures
     ├── components
     │   ├── Home.tsx
     │   ├── ModeCard.tsx
     │   ├── RoomMode.tsx
     │   ├── TinyStoryMode.tsx
     │   ├── MissionMode.tsx
+    │   ├── RainMode.tsx      # the hidden fourth
     │   ├── ConversationBubble.tsx
     │   ├── PrimaryButton.tsx
     │   ├── SecondaryButton.tsx
@@ -208,13 +313,23 @@ animations and CSS transitions are disabled.
     │   ├── characters.ts
     │   ├── roomConversations.ts
     │   ├── tinyStories.ts
-    │   └── stupidMissions.ts
+    │   ├── stupidMissions.ts
+    │   └── rainConversations.ts
     ├── hooks
     │   ├── useAmbientSound.ts
+    │   ├── useRainBed.ts
+    │   ├── useRoomStream.ts
+    │   ├── useEavesdrop.ts   # Home's overheard-dialogue layer
     │   └── useEscape.ts
     ├── services
     │   ├── generationClient.ts
-    │   └── analytics.ts
+    │   ├── analytics.ts
+    │   ├── lastSeen.ts
+    │   ├── sessions.ts       # session counter (unlocks Rain)
+    │   ├── timeBand.ts       # 7-band classification + openers
+    │   ├── moments.ts        # 11:11, midnight, Friday, Sunday
+    │   ├── visitor.ts        # last-visit / returning phrases
+    │   └── eavesdrop.ts      # Home→Room pair handoff
     └── utils
         └── random.ts
 ```
@@ -227,6 +342,7 @@ All hand-written content lives in `src/data`:
 - `roomConversations.ts` — overheard dialogue, tagged for tone selection
 - `tinyStories.ts` — micro-stories with branching choices and endings
 - `stupidMissions.ts` — playful single-line real-world missions
+- `rainConversations.ts` — rin and hal sharing a window
 
 Room conversations carry tags from this set:
 
@@ -234,7 +350,9 @@ Room conversations carry tags from this set:
   `absurd`
 
 The `quiet` and `weird` tags also act as the two non-default tones the user
-can request. Other tags are used by the time-of-day biasing logic.
+can request. Other tags are used by the time-of-day biasing logic. The
+Home eavesdrop layer biases toward `weird` / `absurd` / `object-drama` so
+overheard lines are striking enough to stand alone without context.
 
 ## Writing rules
 
@@ -250,7 +368,7 @@ Content (hand-written and generated) should follow these principles:
 - Concise. A single funny line is better than a paragraph
 
 These rules are encoded in the system prompt for the DeepSeek path
-(`vite.config.ts` → `baseInstructions`).
+(`server/generation.ts` → `baseInstructions`).
 
 ## Scripts
 
