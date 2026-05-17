@@ -16,4 +16,4 @@ CACHE_TTL_SECONDS = "900"
 # then paste the id below.
 [[kv_namespaces]]
 binding = "MOOD_KV"
-id = "PASTE_KV_NAMESPACE_ID_HERE"
+id = "7130e2a5a7f94f7c9207ba83a342d753"
