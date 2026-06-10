@@ -3,17 +3,14 @@
 // Function (Workers runtime). Must stay on Web-standard APIs only: fetch,
 // JSON, no Node-specific imports.
 
+import { resolveCharacterPair } from "./characterPairs";
+
 export type GenerationKind = "room" | "story" | "mission";
 
 export type GenerationRequest = {
   kind?: GenerationKind;
   tone?: "regular" | "quiet" | "weird";
-  pair?: {
-    id?: string;
-    characterA?: { name?: string; personality?: string };
-    characterB?: { name?: string; personality?: string };
-    relationship?: string;
-  };
+  pairId?: string;
   avoidTopic?: string;
   avoidTitle?: string;
   avoidMission?: string;
@@ -43,6 +40,23 @@ const ROOM_TAGS = [
 
 export function isGenerationRequest(value: unknown): value is GenerationRequest {
   return typeof value === "object" && value !== null && "kind" in value;
+}
+
+const TONES = new Set(["regular", "quiet", "weird"]);
+
+function normalizeTone(value: unknown): "regular" | "quiet" | "weird" {
+  return typeof value === "string" && TONES.has(value)
+    ? (value as "regular" | "quiet" | "weird")
+    : "regular";
+}
+
+// Client-supplied free text goes into the prompt as a single line, so strip
+// newlines (no breaking out of the line structure) and cap the length (no
+// padding the token bill).
+function sanitizeFreeText(value: unknown): string {
+  if (typeof value !== "string") return "none";
+  const cleaned = value.replace(/\s+/g, " ").trim().slice(0, 120);
+  return cleaned || "none";
 }
 
 function baseInstructions() {
@@ -101,18 +115,19 @@ export function buildPrompts(request: GenerationRequest): {
   const system = baseInstructions();
 
   if (request.kind === "room") {
-    const firstSpeaker = request.pair?.characterA?.name ?? "Kai";
-    const secondSpeaker = request.pair?.characterB?.name ?? "Mina";
+    // Prompt content comes from the server-side pair table only; the client
+    // contributes nothing but an id (unknown ids fall back to the default).
+    const pair = resolveCharacterPair(request.pairId);
     const user = [
       "Mode: Room.",
       "Write overheard dialogue between the two named characters. They talk to each other, never to the user.",
       "Quiet tone: softer, shorter, less punchline-driven. Weird tone: stranger and more object-focused, never frantic.",
-      `Requested tone: ${request.tone ?? "regular"}.`,
-      `Avoid repeating this topic: ${request.avoidTopic ?? "none"}.`,
-      `Character context: ${JSON.stringify(request.pair)}.`,
+      `Requested tone: ${normalizeTone(request.tone)}.`,
+      `Avoid repeating this topic: ${sanitizeFreeText(request.avoidTopic)}.`,
+      `Character context: ${JSON.stringify(pair)}.`,
       "",
       "Return JSON shaped like:",
-      roomShape(firstSpeaker, secondSpeaker)
+      roomShape(pair.characterA.name, pair.characterB.name)
     ].join("\n");
     return { system, user };
   }
@@ -122,7 +137,7 @@ export function buildPrompts(request: GenerationRequest): {
       "Mode: Tiny Story.",
       "Create one absurd micro-story for 1-3 minutes of play. The start step must have 2 or 3 simple choices.",
       "Use id 'start' for the first step. Ending steps must have an empty choices array and a short ending string. Non-ending steps must have an empty string for ending.",
-      `Avoid repeating this title: ${request.avoidTitle ?? "none"}.`,
+      `Avoid repeating this title: ${sanitizeFreeText(request.avoidTitle)}.`,
       "",
       "Return JSON shaped like:",
       STORY_SHAPE
@@ -135,7 +150,7 @@ export function buildPrompts(request: GenerationRequest): {
     "Create one tiny real-world mission. It must be pure entertainment, not productivity, wellness, learning, cleaning, exercise, or self-improvement.",
     "The mission should be doable in the room in under a minute.",
     "No reward language, no scoring, no follow-up celebration. Just the mission line itself.",
-    `Avoid repeating this mission: ${request.avoidMission ?? "none"}.`,
+    `Avoid repeating this mission: ${sanitizeFreeText(request.avoidMission)}.`,
     "",
     "Return JSON shaped like:",
     MISSION_SHAPE
@@ -196,16 +211,18 @@ export async function callDeepSeek(
 
 // Canonical cache key for a generation request. Same inputs → same key, so
 // identical requests within the cache window share one DeepSeek call.
+// Built from the same normalized values buildPrompts uses, so two request
+// bodies that produce the same prompt always share a cache entry.
 export function cacheKeyFor(request: GenerationRequest): string {
   const parts: string[] = [request.kind ?? "unknown"];
   if (request.kind === "room") {
-    parts.push(request.tone ?? "regular");
-    parts.push(request.pair?.id ?? "no-pair");
-    parts.push(request.avoidTopic ?? "");
+    parts.push(normalizeTone(request.tone));
+    parts.push(resolveCharacterPair(request.pairId).id);
+    parts.push(sanitizeFreeText(request.avoidTopic));
   } else if (request.kind === "story") {
-    parts.push(request.avoidTitle ?? "");
+    parts.push(sanitizeFreeText(request.avoidTitle));
   } else if (request.kind === "mission") {
-    parts.push(request.avoidMission ?? "");
+    parts.push(sanitizeFreeText(request.avoidMission));
   }
   return parts.join("|");
 }

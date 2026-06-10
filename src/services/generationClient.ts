@@ -14,7 +14,9 @@ type GenerationRequest =
   | {
       kind: "room";
       tone: RoomTone;
-      pair: CharacterPair;
+      // Only the id crosses the wire — the server owns the character data and
+      // ignores any client-supplied personality text.
+      pairId: string;
       avoidTopic?: string;
     }
   | {
@@ -114,7 +116,7 @@ export async function generateRoomConversation(
   const result = await requestGeneration("room", {
     kind: "room",
     tone,
-    pair,
+    pairId: pair.id,
     avoidTopic
   });
 
