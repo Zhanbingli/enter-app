@@ -39,11 +39,14 @@
     />
     <meta name="twitter:image" content="https://mood-room.pages.dev/og.png" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Lora is self-hosted (see src/index.css); preload the upright variable
+         file so text renders in the right face on first paint. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="/fonts/lora-latin-var.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
     <title>What kind of boredom is this?</title>
     <style>

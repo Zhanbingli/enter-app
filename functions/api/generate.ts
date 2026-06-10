@@ -152,6 +152,16 @@ export const onRequestPost = async (
     return jsonResponse(400, { error: "invalid_generation_request" });
   }
 
+  const generationRequest = body as GenerationRequest;
+  const cacheKey = await sha256Hex(cacheKeyFor(generationRequest));
+
+  // Cache hits are served before the breakers: they cost no upstream tokens,
+  // shouldn't consume the caller's rate budget, and skip two KV reads.
+  const cached = await readCache(env, cacheKey);
+  if (cached !== null) {
+    return jsonResponse(200, { kind: body.kind, result: cached });
+  }
+
   const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
   const rateCap = parseInt32(env.RATE_LIMIT_PER_HOUR, DEFAULTS.rateLimitPerHour);
   const allowed = await checkRateLimit(env, ip, rateCap);
@@ -163,14 +173,6 @@ export const onRequestPost = async (
   );
   const tokensSoFar = await readBudget(env);
   if (tokensSoFar >= dailyBudget) return noContent();
-
-  const generationRequest = body as GenerationRequest;
-  const cacheKey = await sha256Hex(cacheKeyFor(generationRequest));
-
-  const cached = await readCache(env, cacheKey);
-  if (cached !== null) {
-    return jsonResponse(200, { kind: body.kind, result: cached });
-  }
 
   const result = await callDeepSeek(generationRequest, {
     apiKey,

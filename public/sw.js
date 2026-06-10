@@ -2,7 +2,7 @@
 // All app content is bundled — the network is only needed for /api/generate,
 // which has its own local fallback.
 
-const CACHE_NAME = "mood-room-v3";
+const CACHE_NAME = "mood-room-v4";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -11,8 +11,28 @@ const APP_SHELL = [
   "/icon-192.png",
   "/icon-512.png",
   "/apple-touch-icon.png",
-  "/og.png"
+  "/og.png",
+  "/fonts/lora-latin-var.woff2",
+  "/fonts/lora-latin-italic.woff2"
 ];
+
+// Hashed bundles (/assets/*) change name on every deploy, so without a cap
+// the cache grows forever between CACHE_NAME bumps. Keep the most recent
+// few dozen — plenty for one app version plus stragglers.
+const MAX_HASHED_ASSETS = 48;
+
+async function trimHashedAssets() {
+  const cache = await caches.open(CACHE_NAME);
+  const keys = await cache.keys();
+  const hashed = keys.filter((request) =>
+    new URL(request.url).pathname.startsWith("/assets/")
+  );
+  // cache.keys() preserves insertion order, so the front is the oldest.
+  const excess = hashed.length - MAX_HASHED_ASSETS;
+  for (let i = 0; i < excess; i += 1) {
+    await cache.delete(hashed[i]);
+  }
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -71,7 +91,12 @@ self.addEventListener("fetch", (event) => {
         .then((response) => {
           if (response.ok && response.type === "basic") {
             const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+            event.waitUntil(
+              caches
+                .open(CACHE_NAME)
+                .then((cache) => cache.put(request, copy))
+                .then(trimHashedAssets)
+            );
           }
           return response;
         })

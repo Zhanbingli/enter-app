@@ -169,8 +169,12 @@ export async function generateTinyStory(
       return false;
     }
 
+    if (step.ending !== undefined && typeof step.ending !== "string") {
+      return false;
+    }
+
     if (step.choices === undefined) {
-      return step.ending === undefined || isString(step.ending);
+      return true;
     }
 
     return (
@@ -185,6 +189,17 @@ export async function generateTinyStory(
   }) as TinyStory["steps"];
 
   if (!steps.some((step) => step.id === result.startStepId)) {
+    return null;
+  }
+
+  // Every choice must lead to a surviving step, or the player would silently
+  // bounce back to the start mid-story. A broken graph means a broken
+  // generation — fall back to local content instead.
+  const stepIds = new Set(steps.map((step) => step.id));
+  const connected = steps.every((step) =>
+    (step.choices ?? []).every((choice) => stepIds.has(choice.nextStepId))
+  );
+  if (!connected) {
     return null;
   }
 
