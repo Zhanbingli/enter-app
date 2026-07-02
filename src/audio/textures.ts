@@ -1,5 +1,5 @@
 import { getTimeBand, type TimeBand } from "../services/timeBand";
-import type { RoomTone } from "../types";
+import type { RoomScene, RoomTone } from "../types";
 
 export function makePinkNoiseBuffer(
   context: AudioContext,
@@ -45,6 +45,37 @@ export function makeWhiteNoiseBuffer(
     data[i] = Math.random() * 2 - 1;
   }
   return buffer;
+}
+
+// The steady rain hiss shared by the Rain window and the Room's rain bridge:
+// looped pink noise, high-passed and band-passed into a soft wash. The caller
+// owns the gain node (its level, fades, any LFO) and what else feeds it.
+export function createRainHiss(
+  ctx: AudioContext,
+  dest: AudioNode
+): { source: AudioBufferSourceNode; gain: GainNode } {
+  const source = ctx.createBufferSource();
+  source.buffer = makePinkNoiseBuffer(ctx, 6);
+  source.loop = true;
+
+  const hp = ctx.createBiquadFilter();
+  hp.type = "highpass";
+  hp.frequency.value = 500;
+
+  const bp = ctx.createBiquadFilter();
+  bp.type = "bandpass";
+  bp.frequency.value = 1200;
+  bp.Q.value = 0.6;
+
+  const gain = ctx.createGain();
+
+  source.connect(hp);
+  hp.connect(bp);
+  bp.connect(gain);
+  gain.connect(dest);
+  source.start();
+
+  return { source, gain };
 }
 
 // A kettle starting to whistle, two rooms away.
@@ -219,22 +250,34 @@ type TextureFn = (
 ) => void;
 
 type TextureSpec = {
+  name: NamedTexture;
   fn: TextureFn;
   buffer: "pink" | "white";
   weight: (tone: RoomTone) => number;
 };
 
 const TEXTURES: TextureSpec[] = [
-  { fn: playKettle, buffer: "pink", weight: (t) => (t === "weird" ? 1 : 2) },
+  { name: "kettle", fn: playKettle, buffer: "pink", weight: (t) => (t === "weird" ? 1 : 2) },
   {
+    name: "keyboard",
     fn: playKeyboardCluster,
     buffer: "white",
     weight: (t) => (t === "quiet" ? 0.6 : 2)
   },
-  { fn: playCreak, buffer: "pink", weight: (t) => (t === "weird" ? 3 : 1) },
-  { fn: playPaper, buffer: "pink", weight: () => 1.5 },
-  { fn: playCupClick, buffer: "white", weight: (t) => (t === "quiet" ? 1.6 : 1) }
+  { name: "creak", fn: playCreak, buffer: "pink", weight: (t) => (t === "weird" ? 3 : 1) },
+  { name: "paper", fn: playPaper, buffer: "pink", weight: () => 1.5 },
+  { name: "cup", fn: playCupClick, buffer: "white", weight: (t) => (t === "quiet" ? 1.6 : 1) }
 ];
+
+// The room's character nudges which sounds it tends to make: a kitchen rattles
+// cups and kettles, an odd room creaks, the hush before rain favours softer
+// paper/creak over clicky keys. Multiplies the tone weight above.
+const SCENE_BIAS: Record<RoomScene, Partial<Record<NamedTexture, number>>> = {
+  kitchen: { kettle: 2, cup: 2, paper: 1.2 },
+  odd: { creak: 2.2, paper: 1.4, keyboard: 0.6 },
+  "before-rain": { paper: 1.3, creak: 1.2, keyboard: 0.6 },
+  still: {}
+};
 
 // The foley cues a conversation line can summon (see LineCue in types).
 // "rain" is handled separately by the ambient bed, not here.
@@ -270,6 +313,7 @@ export function playRandomTexture(
   ctx: AudioContext,
   dest: AudioNode,
   tone: RoomTone,
+  scene: RoomScene,
   pinkBuf: AudioBuffer,
   whiteBuf: AudioBuffer
 ) {
@@ -277,7 +321,10 @@ export function playRandomTexture(
   const when = ctx.currentTime + 0.08;
   const pan = Math.random() * 1.6 - 0.8;
 
-  const weighted = TEXTURES.map((spec) => ({ spec, weight: spec.weight(tone) }));
+  const weighted = TEXTURES.map((spec) => ({
+    spec,
+    weight: spec.weight(tone) * (SCENE_BIAS[scene][spec.name] ?? 1)
+  }));
   const total = weighted.reduce((s, t) => s + t.weight, 0);
   let r = Math.random() * total;
   for (const { spec, weight } of weighted) {
