@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { playClick } from "../audio/feedback";
 import { characterPairs } from "../data/characters";
 import { roomConversations } from "../data/roomConversations";
@@ -9,6 +9,7 @@ import { track, useTrackMode } from "../services/analytics";
 import { takeEavesdropPair } from "../services/eavesdrop";
 import { generateRoomConversation } from "../services/generationClient";
 import { getLastSeen, setLastSeen } from "../services/lastSeen";
+import { sceneForConversation } from "../services/roomScene";
 import type {
   CharacterPair,
   RoomConversation,
@@ -79,14 +80,57 @@ export function RoomMode({ onOff }: RoomModeProps) {
     pickConversation(pair.id, getInitialTone(), undefined, getTimeHint())
   );
   const [isToneLoading, setIsToneLoading] = useState(false);
-  const { startSound, stopSound, setTone: setAmbientTone } = useAmbientSound();
+  const [raining, setRaining] = useState(false);
+  // The last few sounds the room actually made — sent to the generator so a
+  // freshly written exchange can lightly acknowledge them.
+  const recentCuesRef = useRef<string[]>([]);
+  const {
+    startSound,
+    stopSound,
+    setTone: setAmbientTone,
+    playCue,
+    setRain,
+    setScene
+  } = useAmbientSound();
 
   const { streamLines, isAtEnd } = useRoomStream({
     pair,
     tone,
     conversation,
-    paused: isToneLoading
+    paused: isToneLoading,
+    onEmit: (line) => {
+      if (!line.cue) return;
+      recentCuesRef.current = [...recentCuesRef.current, line.cue].slice(-3);
+      if (line.cue === "rain") {
+        // The bridge: a line about rain pulls the weather into the room —
+        // rain bed under the pad, rain streaks over the walls.
+        setRaining(true);
+        setRain(true);
+        return;
+      }
+      // Foley, but sparse on purpose: the room answers most cues, not every
+      // one, so it feels overheard rather than sound-tracked.
+      if (Math.random() < 0.7) playCue(line.cue);
+    }
   });
+
+  // When the room moves on to a conversation that isn't about rain, let the
+  // weather clear.
+  useEffect(() => {
+    const hasRain = conversation.lines.some((line) => line.cue === "rain");
+    if (!hasRain) {
+      setRaining(false);
+      setRain(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversation.id]);
+
+  // Let the bed take on the character of the room this conversation happens
+  // in — warmer in a kitchen, hollower before rain, slightly sour when odd.
+  useEffect(() => {
+    setScene(sceneForConversation(conversation));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversation.id]);
 
   function leaveRoom() {
     playClick("off");
@@ -99,6 +143,9 @@ export function RoomMode({ onOff }: RoomModeProps) {
 
   useEffect(() => {
     void startSound(tone);
+    // Apply the opening conversation's scene once the bed exists (the
+    // conversation-scene effect above runs before startSound builds it).
+    setScene(sceneForConversation(conversation));
     return () => stopSound();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -124,7 +171,12 @@ export function RoomMode({ onOff }: RoomModeProps) {
     const generated = await generateRoomConversation(
       nextTone,
       pair,
-      conversation.topic
+      conversation.topic,
+      {
+        scene: sceneForConversation(conversation),
+        raining,
+        recentSounds: recentCuesRef.current
+      }
     );
     const next =
       generated ??
@@ -147,7 +199,16 @@ export function RoomMode({ onOff }: RoomModeProps) {
 
   return (
     <div className="soft-room min-h-screen">
-      <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-5 py-8 sm:px-8 sm:py-10">
+      <div
+        className={`pointer-events-none fixed inset-0 z-[1] transition-opacity duration-[2500ms] ${
+          raining ? "opacity-100" : "opacity-0"
+        }`}
+        aria-hidden
+      >
+        <div className="rain-layer" />
+        <div className="rain-layer rain-layer-2" />
+      </div>
+      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-2xl flex-col px-5 py-8 sm:px-8 sm:py-10">
         <button
           className="inline-flex min-h-11 items-center self-start px-2 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink/35 transition hover:text-ink"
           onClick={leaveRoom}

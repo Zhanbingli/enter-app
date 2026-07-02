@@ -6,6 +6,7 @@ export default {
       colors: {
         paper: "rgb(var(--color-paper) / <alpha-value>)",
         ink: "rgb(var(--color-ink) / <alpha-value>)",
+        lamp: "rgb(var(--color-lamp) / <alpha-value>)",
         clay: "rgb(var(--color-clay) / <alpha-value>)",
         moss: "rgb(var(--color-moss) / <alpha-value>)",
         tide: "rgb(var(--color-tide) / <alpha-value>)",

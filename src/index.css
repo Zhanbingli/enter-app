@@ -29,43 +29,27 @@
     U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/* --- Palette: the lamplit room ------------------------------------------
+   Dark-first, on purpose. This is a place to land when you're tired or
+   lonely, so the base is a warm near-black room lit by a single amber
+   lamp — not a bright page. Time of day tints the lamp, not the walls. */
 :root {
-  --color-paper: 247 240 231;
-  --color-ink: 47 43 39;
-  --color-clay: 201 130 99;
-  --color-moss: 127 149 113;
-  --color-tide: 111 146 155;
-  --color-cocoa: 95 74 61;
-  --color-cream: 255 250 242;
+  --color-paper: 20 17 14; /* #14110e — the dark room (base surface) */
+  --color-ink: 234 225 210; /* #eae1d2 — warm off-white, the text */
+  --color-cream: 32 27 22; /* #201b16 — a surface lifted toward the light */
+  --color-lamp: 232 186 122; /* #e8ba7a — amber lamplight, the signature glow */
+  --color-clay: 212 142 108; /* #d48e6c — ember accent */
+  --color-moss: 146 168 130; /* #92a882 */
+  --color-tide: 132 162 172; /* #84a2ac */
+  --color-cocoa: 176 156 132; /* #b09c84 — muted warm, for labels/captions */
 
   color: rgb(var(--color-ink));
   background: rgb(var(--color-paper));
+  color-scheme: dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-paper: 26 24 22;
-    --color-ink: 232 226 215;
-    --color-clay: 198 132 102;
-    --color-moss: 138 158 124;
-    --color-tide: 122 152 162;
-    --color-cocoa: 196 172 152;
-    --color-cream: 245 238 226;
-  }
-}
-
-:root[data-late] {
-  --color-paper: 26 24 22;
-  --color-ink: 232 226 215;
-  --color-clay: 198 132 102;
-  --color-moss: 138 158 124;
-  --color-tide: 122 152 162;
-  --color-cocoa: 196 172 152;
-  --color-cream: 245 238 226;
 }
 
 * {
@@ -83,73 +67,74 @@ button {
 }
 
 ::selection {
-  background: rgba(201, 130, 99, 0.35);
+  background: rgba(232, 186, 122, 0.28);
 }
 
+/* --- Home: the room, with one warm lamp overhead ------------------------ */
 .soft-noise {
   background-image:
-    radial-gradient(circle at 20% 10%, rgba(255, 250, 242, 0.92), transparent 34%),
-    radial-gradient(circle at 76% 14%, rgba(111, 146, 155, 0.18), transparent 30%),
-    radial-gradient(circle at 80% 86%, rgba(127, 149, 113, 0.19), transparent 32%),
-    linear-gradient(135deg, #f7f0e7 0%, #efe1d1 100%);
+    radial-gradient(115% 80% at 50% -12%, rgba(232, 186, 122, 0.13), transparent 62%),
+    radial-gradient(80% 60% at 82% 112%, rgba(132, 162, 172, 0.06), transparent 60%),
+    linear-gradient(180deg, #17130f 0%, #100d0a 100%);
   transition: background-image 1200ms ease;
 }
 
-/* Subtle time-of-day tints on Home. deep-night/late already get the dark
-   treatment via :root[data-late] further down. */
+/* The lamp warms and cools with the hour. Deep night dims it; dusk pushes
+   it amber. The walls stay dark either way. */
 :root[data-band="dawn"] .soft-noise {
   background-image:
-    radial-gradient(circle at 20% 10%, rgba(255, 245, 240, 0.92), transparent 34%),
-    radial-gradient(circle at 78% 18%, rgba(180, 170, 200, 0.22), transparent 30%),
-    radial-gradient(circle at 80% 86%, rgba(210, 180, 170, 0.18), transparent 32%),
-    linear-gradient(135deg, #f6ece4 0%, #ecd9d3 100%);
+    radial-gradient(115% 80% at 50% -12%, rgba(214, 176, 186, 0.11), transparent 62%),
+    radial-gradient(80% 60% at 82% 112%, rgba(132, 162, 172, 0.06), transparent 60%),
+    linear-gradient(180deg, #16130f 0%, #100e0b 100%);
 }
 :root[data-band="dusk"] .soft-noise {
   background-image:
-    radial-gradient(circle at 18% 12%, rgba(255, 240, 220, 0.94), transparent 34%),
-    radial-gradient(circle at 78% 16%, rgba(220, 140, 90, 0.22), transparent 32%),
-    radial-gradient(circle at 80% 86%, rgba(180, 110, 70, 0.18), transparent 32%),
-    linear-gradient(135deg, #f5e1c8 0%, #e6c098 100%);
+    radial-gradient(115% 82% at 50% -12%, rgba(226, 150, 92, 0.17), transparent 62%),
+    radial-gradient(80% 60% at 82% 112%, rgba(120, 90, 70, 0.07), transparent 60%),
+    linear-gradient(180deg, #191310 0%, #110c09 100%);
 }
 :root[data-band="evening"] .soft-noise {
   background-image:
-    radial-gradient(circle at 20% 12%, rgba(245, 225, 200, 0.88), transparent 34%),
-    radial-gradient(circle at 76% 14%, rgba(160, 100, 80, 0.22), transparent 30%),
-    radial-gradient(circle at 80% 86%, rgba(120, 95, 75, 0.18), transparent 32%),
-    linear-gradient(135deg, #ead8c0 0%, #d4b496 100%);
+    radial-gradient(115% 80% at 50% -12%, rgba(230, 170, 110, 0.14), transparent 62%),
+    radial-gradient(80% 60% at 82% 112%, rgba(110, 90, 72, 0.06), transparent 60%),
+    linear-gradient(180deg, #17120e 0%, #100c09 100%);
+}
+:root[data-band="deep-night"] .soft-noise,
+:root[data-late] .soft-noise {
+  background-image:
+    radial-gradient(115% 78% at 50% -12%, rgba(232, 186, 122, 0.08), transparent 62%),
+    radial-gradient(80% 60% at 82% 112%, rgba(132, 162, 172, 0.05), transparent 60%),
+    linear-gradient(180deg, #131009 0%, #0d0a07 100%);
 }
 
+/* --- Mode rooms: each keeps its own light temperature, all dimmed ------- */
 .soft-room {
   background-image:
-    radial-gradient(circle at 18% 8%, rgba(232, 232, 240, 0.88), transparent 36%),
-    radial-gradient(circle at 82% 12%, rgba(70, 92, 105, 0.18), transparent 30%),
-    radial-gradient(circle at 78% 82%, rgba(60, 80, 95, 0.16), transparent 34%),
-    linear-gradient(135deg, #e8e6e0 0%, #d6d3cc 100%);
+    radial-gradient(100% 70% at 50% -8%, rgba(150, 178, 200, 0.10), transparent 60%),
+    radial-gradient(90% 60% at 80% 108%, rgba(60, 80, 95, 0.10), transparent 60%),
+    linear-gradient(180deg, #141a1f 0%, #0e1216 100%);
 }
 
 .soft-story {
   background-image:
-    radial-gradient(circle at 20% 10%, rgba(255, 250, 242, 0.92), transparent 34%),
-    radial-gradient(circle at 78% 16%, rgba(201, 130, 99, 0.20), transparent 30%),
-    radial-gradient(circle at 82% 84%, rgba(180, 120, 80, 0.16), transparent 32%),
-    linear-gradient(135deg, #f5e9d8 0%, #e8d2b2 100%);
+    radial-gradient(100% 70% at 50% -8%, rgba(232, 186, 122, 0.13), transparent 60%),
+    radial-gradient(90% 60% at 80% 108%, rgba(180, 120, 80, 0.08), transparent 60%),
+    linear-gradient(180deg, #1a140e 0%, #120d08 100%);
 }
 
 .soft-mission {
   background-image:
-    radial-gradient(circle at 20% 12%, rgba(245, 240, 230, 0.90), transparent 35%),
-    radial-gradient(circle at 78% 14%, rgba(127, 149, 113, 0.20), transparent 30%),
-    radial-gradient(circle at 80% 86%, rgba(110, 130, 100, 0.16), transparent 32%),
-    linear-gradient(135deg, #eef1e6 0%, #d8dccf 100%);
+    radial-gradient(100% 70% at 50% -8%, rgba(150, 176, 130, 0.11), transparent 60%),
+    radial-gradient(90% 60% at 80% 108%, rgba(90, 110, 80, 0.08), transparent 60%),
+    linear-gradient(180deg, #141810 0%, #0e120b 100%);
 }
 
 /* Rain window — the hidden room. Cool grey-blue, layered streak animation. */
 .soft-rain {
   background-image:
-    radial-gradient(circle at 18% 8%, rgba(220, 230, 240, 0.85), transparent 38%),
-    radial-gradient(circle at 82% 14%, rgba(70, 90, 110, 0.20), transparent 32%),
-    radial-gradient(circle at 78% 84%, rgba(50, 70, 90, 0.18), transparent 36%),
-    linear-gradient(180deg, #c8d0d8 0%, #a8b4c0 100%);
+    radial-gradient(100% 70% at 50% -8%, rgba(170, 195, 215, 0.10), transparent 60%),
+    radial-gradient(90% 60% at 80% 108%, rgba(50, 70, 90, 0.14), transparent 60%),
+    linear-gradient(180deg, #12171d 0%, #0d1116 100%);
   position: relative;
 }
 
@@ -158,26 +143,26 @@ button {
   inset: 0;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.65;
+  opacity: 0.5;
   background-image: repeating-linear-gradient(
     102deg,
     transparent 0 86px,
-    rgba(190, 210, 230, 0.16) 86px 87px,
+    rgba(190, 210, 230, 0.14) 86px 87px,
     transparent 87px 124px,
-    rgba(190, 210, 230, 0.10) 124px 125px,
+    rgba(190, 210, 230, 0.08) 124px 125px,
     transparent 125px 168px,
-    rgba(190, 210, 230, 0.12) 168px 169px
+    rgba(190, 210, 230, 0.10) 168px 169px
   );
   background-size: 320px 220px;
   animation: rain-fall-slow 850ms linear infinite;
 }
 
 .rain-layer-2 {
-  opacity: 0.45;
+  opacity: 0.35;
   background-image: repeating-linear-gradient(
     105deg,
     transparent 0 130px,
-    rgba(180, 200, 220, 0.10) 130px 131px,
+    rgba(180, 200, 220, 0.09) 130px 131px,
     transparent 131px 220px
   );
   background-size: 420px 180px;
@@ -194,82 +179,46 @@ button {
   to { background-position: -42px 180px; }
 }
 
-@media (prefers-color-scheme: dark) {
-  .soft-noise {
-    background-image:
-      radial-gradient(circle at 20% 10%, rgba(255, 240, 220, 0.06), transparent 36%),
-      radial-gradient(circle at 76% 14%, rgba(111, 146, 155, 0.14), transparent 32%),
-      radial-gradient(circle at 80% 86%, rgba(127, 149, 113, 0.12), transparent 34%),
-      linear-gradient(135deg, #1a1815 0%, #14110f 100%);
-  }
-  .soft-room {
-    background-image:
-      radial-gradient(circle at 18% 8%, rgba(180, 200, 220, 0.07), transparent 38%),
-      radial-gradient(circle at 82% 12%, rgba(70, 92, 105, 0.22), transparent 32%),
-      radial-gradient(circle at 78% 82%, rgba(60, 80, 95, 0.18), transparent 36%),
-      linear-gradient(135deg, #161a1d 0%, #11141a 100%);
-  }
-  .soft-story {
-    background-image:
-      radial-gradient(circle at 20% 10%, rgba(255, 240, 220, 0.06), transparent 36%),
-      radial-gradient(circle at 78% 16%, rgba(201, 130, 99, 0.18), transparent 32%),
-      radial-gradient(circle at 82% 84%, rgba(180, 120, 80, 0.14), transparent 34%),
-      linear-gradient(135deg, #1c1612 0%, #15100c 100%);
-  }
-  .soft-mission {
-    background-image:
-      radial-gradient(circle at 20% 12%, rgba(220, 230, 200, 0.05), transparent 36%),
-      radial-gradient(circle at 78% 14%, rgba(127, 149, 113, 0.18), transparent 32%),
-      radial-gradient(circle at 80% 86%, rgba(110, 130, 100, 0.14), transparent 34%),
-      linear-gradient(135deg, #161a14 0%, #10130e 100%);
-  }
+/* --- The lamp: a mode card's warm pool of light ------------------------- */
+.lamp-glow {
+  position: absolute;
+  top: -3.25rem;
+  left: -3.25rem;
+  height: 12rem;
+  width: 12rem;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(30px);
+  opacity: 0.42;
+  background: radial-gradient(
+    circle at 40% 40%,
+    rgb(var(--glow) / 0.85),
+    transparent 68%
+  );
+  transition:
+    opacity 500ms ease,
+    transform 500ms ease;
 }
 
-:root[data-late] .soft-noise {
-  background-image:
-    radial-gradient(circle at 20% 10%, rgba(255, 240, 220, 0.06), transparent 36%),
-    radial-gradient(circle at 76% 14%, rgba(111, 146, 155, 0.14), transparent 32%),
-    radial-gradient(circle at 80% 86%, rgba(127, 149, 113, 0.12), transparent 34%),
-    linear-gradient(135deg, #1a1815 0%, #14110f 100%);
-}
-:root[data-late] .soft-room {
-  background-image:
-    radial-gradient(circle at 18% 8%, rgba(180, 200, 220, 0.07), transparent 38%),
-    radial-gradient(circle at 82% 12%, rgba(70, 92, 105, 0.22), transparent 32%),
-    radial-gradient(circle at 78% 82%, rgba(60, 80, 95, 0.18), transparent 36%),
-    linear-gradient(135deg, #161a1d 0%, #11141a 100%);
-}
-:root[data-late] .soft-story {
-  background-image:
-    radial-gradient(circle at 20% 10%, rgba(255, 240, 220, 0.06), transparent 36%),
-    radial-gradient(circle at 78% 16%, rgba(201, 130, 99, 0.18), transparent 32%),
-    radial-gradient(circle at 82% 84%, rgba(180, 120, 80, 0.14), transparent 34%),
-    linear-gradient(135deg, #1c1612 0%, #15100c 100%);
-}
-:root[data-late] .soft-mission {
-  background-image:
-    radial-gradient(circle at 20% 12%, rgba(220, 230, 200, 0.05), transparent 36%),
-    radial-gradient(circle at 78% 14%, rgba(127, 149, 113, 0.18), transparent 32%),
-    radial-gradient(circle at 80% 86%, rgba(110, 130, 100, 0.14), transparent 34%),
-    linear-gradient(135deg, #161a14 0%, #10130e 100%);
+.group:hover .lamp-glow {
+  opacity: 0.72;
+  transform: scale(1.12);
 }
 
-@media (prefers-color-scheme: dark) {
-  .soft-rain {
-    background-image:
-      radial-gradient(circle at 18% 8%, rgba(180, 200, 220, 0.06), transparent 38%),
-      radial-gradient(circle at 82% 12%, rgba(80, 100, 120, 0.22), transparent 32%),
-      radial-gradient(circle at 78% 82%, rgba(40, 60, 80, 0.18), transparent 36%),
-      linear-gradient(180deg, #1a1f24 0%, #11161c 100%);
-  }
+.lamp-orb {
+  height: 0.55rem;
+  width: 0.55rem;
+  border-radius: 9999px;
+  background: rgb(var(--glow));
+  box-shadow: 0 0 16px 3px rgb(var(--glow) / 0.55);
+  transition:
+    box-shadow 300ms ease,
+    transform 300ms ease;
 }
 
-:root[data-late] .soft-rain {
-  background-image:
-    radial-gradient(circle at 18% 8%, rgba(180, 200, 220, 0.06), transparent 38%),
-    radial-gradient(circle at 82% 12%, rgba(80, 100, 120, 0.22), transparent 32%),
-    radial-gradient(circle at 78% 82%, rgba(40, 60, 80, 0.18), transparent 36%),
-    linear-gradient(180deg, #1a1f24 0%, #11161c 100%);
+.group:hover .lamp-orb {
+  box-shadow: 0 0 26px 6px rgb(var(--glow) / 0.7);
+  transform: scale(1.18);
 }
 
 .enter {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { unlockAudio } from "../audio/context";
 import { playClick } from "../audio/feedback";
 import { useEavesdrop } from "../hooks/useEavesdrop";
@@ -28,14 +28,19 @@ export function Home({ onSelectMode }: HomeProps) {
     <div className="soft-noise min-h-screen">
       <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-5 py-10 sm:px-8">
         <section className="enter max-w-3xl">
-          <p className="mb-4 text-sm font-medium lowercase tracking-[0.18em] text-cocoa/55">
+          <p className="mb-5 flex items-center gap-3 text-sm font-medium lowercase tracking-[0.18em] text-cocoa/60">
+            <span
+              className="lamp-orb"
+              style={{ "--glow": "var(--color-lamp)" } as CSSProperties}
+              aria-hidden
+            />
             {opener}
           </p>
-          <h1 className="max-w-2xl text-4xl font-semibold leading-[1.05] text-ink sm:text-6xl">
+          <h1 className="max-w-2xl font-serif text-4xl font-medium leading-[1.08] text-ink sm:text-6xl">
             What kind of boredom is this?
           </h1>
-          <p className="mt-5 text-lg leading-8 text-ink/64 sm:text-xl">
-            Pick a state. No scrolling required.
+          <p className="mt-5 text-lg leading-8 text-ink/55 sm:text-xl">
+            Pick a room to sit near. Nothing to scroll, no one to answer.
           </p>
         </section>
 
