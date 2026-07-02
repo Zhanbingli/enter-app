@@ -66,6 +66,17 @@ button {
   font: inherit;
 }
 
+/* A visible keyboard-focus indicator for every interactive element. The many
+   tiny text controls (off / another / quieter / mute …) had only a hover
+   state, so keyboard users had nothing to track on the dark background. Uses
+   :where() for zero specificity, so components with their own focus ring
+   (e.g. ModeCard) keep theirs. */
+:where(button, a, [role="button"]):focus-visible {
+  outline: 2px solid rgb(var(--color-lamp) / 0.7);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
 ::selection {
   background: rgba(232, 186, 122, 0.28);
 }

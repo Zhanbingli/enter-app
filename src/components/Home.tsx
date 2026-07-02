@@ -28,7 +28,7 @@ export function Home({ onSelectMode }: HomeProps) {
     <div className="soft-noise min-h-screen">
       <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-5 py-10 sm:px-8">
         <section className="enter max-w-3xl">
-          <p className="mb-5 flex items-center gap-3 text-sm font-medium lowercase tracking-[0.18em] text-cocoa/60">
+          <p className="mb-5 flex items-center gap-3 text-sm font-medium lowercase tracking-[0.18em] text-cocoa/75">
             <span
               className="lamp-orb"
               style={{ "--glow": "var(--color-lamp)" } as CSSProperties}
@@ -81,7 +81,7 @@ export function Home({ onSelectMode }: HomeProps) {
           </button>
         ) : null}
 
-        <p className="mt-12 text-xs uppercase tracking-[0.18em] text-ink/30">
+        <p className="mt-12 text-xs uppercase tracking-[0.18em] text-ink/45">
           esc anywhere to step out
         </p>
       </main>
