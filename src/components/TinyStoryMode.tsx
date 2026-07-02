@@ -94,7 +94,7 @@ export function TinyStoryMode({ onBack }: TinyStoryModeProps) {
   return (
     <div className="soft-story min-h-screen font-serif">
       <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 py-8 sm:px-8 sm:py-10">
-        <div className="flex items-center justify-between font-sans text-xs font-semibold uppercase tracking-[0.18em] text-ink/35">
+        <div className="flex items-center justify-between font-sans text-xs font-semibold uppercase tracking-[0.18em] text-ink/50">
           <button
             className="inline-flex min-h-11 items-center px-2 py-2 transition hover:text-ink"
             onClick={exit}

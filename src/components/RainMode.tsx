@@ -4,6 +4,7 @@ import { useEscape } from "../hooks/useEscape";
 import { useRainBed } from "../hooks/useRainBed";
 import { rainConversations, type RainConversation } from "../data/rainConversations";
 import { useTrackMode } from "../services/analytics";
+import { isSoundEnabled, setSoundEnabled } from "../services/soundPref";
 import { randomItemExcept } from "../utils/random";
 
 type RainModeProps = {
@@ -27,6 +28,7 @@ export function RainMode({ onBack }: RainModeProps) {
   );
   const [stream, setStream] = useState<StreamLine[]>([]);
   const [lineIndex, setLineIndex] = useState(0);
+  const [soundOn, setSoundOn] = useState(isSoundEnabled);
   const { start: startRain, stop: stopRain } = useRainBed();
 
   useTrackMode("rain");
@@ -37,10 +39,21 @@ export function RainMode({ onBack }: RainModeProps) {
     onBack();
   }
 
+  function toggleSound() {
+    playClick("toggle");
+    setSoundOn((prev) => {
+      const next = !prev;
+      setSoundEnabled(next);
+      if (next) void startRain();
+      else stopRain();
+      return next;
+    });
+  }
+
   useEscape(exit);
 
   useEffect(() => {
-    void startRain();
+    if (soundOn) void startRain();
     return () => stopRain();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -81,12 +94,21 @@ export function RainMode({ onBack }: RainModeProps) {
       <div className="rain-layer" aria-hidden />
       <div className="rain-layer rain-layer-2" aria-hidden />
       <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-2xl flex-col px-5 py-8 sm:px-8 sm:py-10">
-        <button
-          className="inline-flex min-h-11 items-center self-start px-2 py-2 text-xs font-medium lowercase tracking-[0.18em] text-ink/40 transition hover:text-ink"
-          onClick={exit}
-        >
-          off
-        </button>
+        <div className="flex items-center justify-between text-xs font-medium lowercase tracking-[0.18em] text-ink/55">
+          <button
+            className="inline-flex min-h-11 items-center px-2 py-2 transition hover:text-ink"
+            onClick={exit}
+          >
+            off
+          </button>
+          <button
+            className="inline-flex min-h-11 items-center px-2 py-2 transition hover:text-ink"
+            onClick={toggleSound}
+            aria-pressed={!soundOn}
+          >
+            {soundOn ? "mute" : "unmute"}
+          </button>
+        </div>
 
         <section className="mt-auto space-y-4" aria-live="polite">
           {stream.map((line, index) => {
@@ -110,7 +132,7 @@ export function RainMode({ onBack }: RainModeProps) {
           })}
         </section>
 
-        <div className="mt-12 text-center text-[11px] lowercase tracking-[0.22em] text-ink/35">
+        <div className="mt-12 text-center text-[11px] lowercase tracking-[0.22em] text-ink/50">
           the window stays open.
         </div>
       </main>

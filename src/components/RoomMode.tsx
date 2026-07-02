@@ -10,6 +10,7 @@ import { takeEavesdropPair } from "../services/eavesdrop";
 import { generateRoomConversation } from "../services/generationClient";
 import { getLastSeen, setLastSeen } from "../services/lastSeen";
 import { sceneForConversation } from "../services/roomScene";
+import { isSoundEnabled, setSoundEnabled } from "../services/soundPref";
 import type {
   CharacterPair,
   RoomConversation,
@@ -81,6 +82,7 @@ export function RoomMode({ onOff }: RoomModeProps) {
   );
   const [isToneLoading, setIsToneLoading] = useState(false);
   const [raining, setRaining] = useState(false);
+  const [soundOn, setSoundOn] = useState(isSoundEnabled);
   // The last few sounds the room actually made — sent to the generator so a
   // freshly written exchange can lightly acknowledge them.
   const recentCuesRef = useRef<string[]>([]);
@@ -138,14 +140,33 @@ export function RoomMode({ onOff }: RoomModeProps) {
     onOff();
   }
 
+  function toggleSound() {
+    playClick("toggle");
+    setSoundOn((prev) => {
+      const next = !prev;
+      setSoundEnabled(next);
+      if (next) {
+        void startSound(tone);
+        setScene(sceneForConversation(conversation));
+      } else {
+        stopSound();
+      }
+      return next;
+    });
+  }
+
   useTrackMode("room");
   useEscape(leaveRoom);
 
   useEffect(() => {
-    void startSound(tone);
-    // Apply the opening conversation's scene once the bed exists (the
-    // conversation-scene effect above runs before startSound builds it).
-    setScene(sceneForConversation(conversation));
+    // The room can be read in silence — only build the ambient bed if the
+    // user hasn't muted it.
+    if (soundOn) {
+      void startSound(tone);
+      // Apply the opening conversation's scene once the bed exists (the
+      // conversation-scene effect above runs before startSound builds it).
+      setScene(sceneForConversation(conversation));
+    }
     return () => stopSound();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -209,12 +230,21 @@ export function RoomMode({ onOff }: RoomModeProps) {
         <div className="rain-layer rain-layer-2" />
       </div>
       <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-2xl flex-col px-5 py-8 sm:px-8 sm:py-10">
-        <button
-          className="inline-flex min-h-11 items-center self-start px-2 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink/35 transition hover:text-ink"
-          onClick={leaveRoom}
-        >
-          off
-        </button>
+        <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-ink/50">
+          <button
+            className="inline-flex min-h-11 items-center px-2 py-2 transition hover:text-ink"
+            onClick={leaveRoom}
+          >
+            off
+          </button>
+          <button
+            className="inline-flex min-h-11 items-center px-2 py-2 transition hover:text-ink"
+            onClick={toggleSound}
+            aria-pressed={!soundOn}
+          >
+            {soundOn ? "mute" : "unmute"}
+          </button>
+        </div>
 
       <section className="mt-auto space-y-4" aria-live="polite">
         {streamLines.map((line, index) => {
@@ -238,14 +268,14 @@ export function RoomMode({ onOff }: RoomModeProps) {
 
         <div className="mt-10 flex justify-center gap-8">
           <button
-            className="inline-flex min-h-11 items-center px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink/35 transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex min-h-11 items-center px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink/50 transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
             onClick={() => void changeTone("quiet")}
             disabled={isToneLoading}
           >
             quieter
           </button>
           <button
-            className="inline-flex min-h-11 items-center px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink/35 transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex min-h-11 items-center px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink/50 transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
             onClick={() => void changeTone("weird")}
             disabled={isToneLoading}
           >
