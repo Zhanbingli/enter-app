@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
   CharacterPair,
+  LineCue,
   RoomConversation,
   RoomTone
 } from "../types";
@@ -10,6 +11,7 @@ export type StreamLine = {
   text: string;
   key: string;
   align: "left" | "right";
+  cue?: LineCue;
 };
 
 const STREAM_CAP = 6;
@@ -23,6 +25,9 @@ type UseRoomStreamOptions = {
   tone: RoomTone;
   conversation: RoomConversation;
   paused?: boolean;
+  // Called once when each line actually drips onto the screen — the single
+  // point where the room can react to what was just said.
+  onEmit?: (line: StreamLine) => void;
 };
 
 function pacingFor(tone: RoomTone): number {
@@ -35,8 +40,13 @@ export function useRoomStream({
   pair,
   tone,
   conversation,
-  paused = false
+  paused = false,
+  onEmit
 }: UseRoomStreamOptions) {
+  // Keep the latest callback without making it an effect dependency, so the
+  // pacing timer isn't torn down and restarted every render.
+  const onEmitRef = useRef(onEmit);
+  onEmitRef.current = onEmit;
   // Tie lineIndex to the conversation it belongs to, so a mid-flight
   // conversation swap can't drip a stale index into a new conversation.
   const [progress, setProgress] = useState(() => ({
@@ -65,18 +75,20 @@ export function useRoomStream({
         : pacingFor(tone);
     const timer = window.setTimeout(() => {
       const line = conversation.lines[lineIndex];
+      const next: StreamLine = {
+        speaker: line.speaker,
+        text: line.text,
+        align: line.speaker === pair.characterA.name ? "left" : "right",
+        key: `${conversation.id}-${lineIndex}`,
+        cue: line.cue
+      };
       setStreamLines((prev) => {
-        const next: StreamLine = {
-          speaker: line.speaker,
-          text: line.text,
-          align: line.speaker === pair.characterA.name ? "left" : "right",
-          key: `${conversation.id}-${lineIndex}`
-        };
         const updated = [...prev, next];
         return updated.length > STREAM_CAP
           ? updated.slice(-STREAM_CAP)
           : updated;
       });
+      onEmitRef.current?.(next);
       setProgress({ convId: conversation.id, index: lineIndex + 1 });
     }, delay);
     return () => window.clearTimeout(timer);

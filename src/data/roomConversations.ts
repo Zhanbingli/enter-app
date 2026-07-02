@@ -35,7 +35,8 @@ export const roomConversations: RoomConversation[] = [
     lines: [
       {
         speaker: "Kai",
-        text: "There is one spoon in the sink, positioned like it has been found at the scene."
+        text: "There is one spoon in the sink, positioned like it has been found at the scene.",
+        cue: "cup"
       },
       {
         speaker: "Mina",
@@ -114,7 +115,8 @@ export const roomConversations: RoomConversation[] = [
     lines: [
       {
         speaker: "Kai",
-        text: "The rain is doing that soft tapping like it needs to borrow something."
+        text: "The rain is doing that soft tapping like it needs to borrow something.",
+        cue: "rain"
       },
       {
         speaker: "Mina",
@@ -539,7 +541,8 @@ export const roomConversations: RoomConversation[] = [
     lines: [
       {
         speaker: "Sol",
-        text: "The kettle is steaming like it is guiding tiny ships through breakfast."
+        text: "The kettle is steaming like it is guiding tiny ships through breakfast.",
+        cue: "kettle"
       },
       {
         speaker: "Ada",
@@ -664,7 +667,8 @@ export const roomConversations: RoomConversation[] = [
     lines: [
       {
         speaker: "Mina",
-        text: "The kettle made that small noise again. Like it is about to start a speech."
+        text: "The kettle made that small noise again. Like it is about to start a speech.",
+        cue: "kettle"
       },
       {
         speaker: "Kai",
@@ -714,7 +718,8 @@ export const roomConversations: RoomConversation[] = [
     lines: [
       {
         speaker: "Kai",
-        text: "The window has fogged up in a long uneven shape. Looks like a letter being drafted."
+        text: "The window has fogged up in a long uneven shape. Looks like a letter being drafted.",
+        cue: "rain"
       },
       {
         speaker: "Mina",

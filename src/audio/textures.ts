@@ -236,6 +236,36 @@ const TEXTURES: TextureSpec[] = [
   { fn: playCupClick, buffer: "white", weight: (t) => (t === "quiet" ? 1.6 : 1) }
 ];
 
+// The foley cues a conversation line can summon (see LineCue in types).
+// "rain" is handled separately by the ambient bed, not here.
+export type NamedTexture = "kettle" | "cup" | "keyboard" | "creak" | "paper";
+
+// Play one specific texture on demand — used when a line carries a cue, so
+// the room reacts to what's being said rather than firing on a blind timer.
+export function playNamedTexture(
+  ctx: AudioContext,
+  dest: AudioNode,
+  name: NamedTexture,
+  pinkBuf: AudioBuffer,
+  whiteBuf: AudioBuffer
+) {
+  if (ctx.state !== "running") return;
+  const when = ctx.currentTime + 0.08;
+  const pan = Math.random() * 1.2 - 0.6;
+  switch (name) {
+    case "kettle":
+      return playKettle(ctx, dest, pinkBuf, when, pan);
+    case "cup":
+      return playCupClick(ctx, dest, whiteBuf, when, pan);
+    case "keyboard":
+      return playKeyboardCluster(ctx, dest, whiteBuf, when, pan);
+    case "creak":
+      return playCreak(ctx, dest, pinkBuf, when, pan);
+    case "paper":
+      return playPaper(ctx, dest, pinkBuf, when, pan);
+  }
+}
+
 export function playRandomTexture(
   ctx: AudioContext,
   dest: AudioNode,
