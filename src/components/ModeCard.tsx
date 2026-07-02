@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { unlockAudio } from "../audio/context";
 import { playClick } from "../audio/feedback";
 import type { Mode } from "../types";
@@ -10,11 +11,14 @@ type ModeCardProps = {
   mode: Mode;
 };
 
-const accentClasses = {
-  clay: "bg-clay",
-  moss: "bg-moss",
-  tide: "bg-tide"
-};
+// Each card is lit by its own lamp. The accent drives both the glow pooling
+// inside the card and the small filament-orb — set once as a CSS variable so
+// the .lamp-glow / .lamp-orb rules in index.css can read it.
+const accentVar = {
+  clay: "--color-clay",
+  moss: "--color-moss",
+  tide: "--color-tide"
+} as const;
 
 export function ModeCard({
   title,
@@ -23,9 +27,14 @@ export function ModeCard({
   onSelect,
   mode
 }: ModeCardProps) {
+  const glowStyle = {
+    "--glow": `var(${accentVar[accent]})`
+  } as CSSProperties;
+
   return (
     <button
-      className="group flex min-h-44 w-full flex-col justify-between rounded-lg border border-ink/10 bg-cream/82 p-6 text-left shadow-soft backdrop-blur transition duration-200 hover:-translate-y-1 hover:border-ink/20 hover:bg-cream focus:outline-none focus:ring-2 focus:ring-clay focus:ring-offset-2 focus:ring-offset-paper"
+      style={glowStyle}
+      className="group relative flex min-h-48 w-full flex-col justify-between overflow-hidden rounded-2xl border border-ink/10 bg-cream/60 p-6 text-left backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-ink/25 hover:bg-cream/80 focus:outline-none focus:ring-2 focus:ring-lamp/70 focus:ring-offset-2 focus:ring-offset-paper"
       onClick={() => {
         // iOS Safari needs the AudioContext to be resumed inside a user
         // gesture — Room's later useEffect is past that gesture window.
@@ -34,14 +43,13 @@ export function ModeCard({
         onSelect(mode);
       }}
     >
-      <span
-        className={`h-2.5 w-12 rounded-full ${accentClasses[accent]} transition duration-200 group-hover:w-16`}
-      />
-      <span className="space-y-3">
-        <span className="block text-xl font-semibold leading-tight text-ink sm:text-2xl">
+      <span className="lamp-glow" aria-hidden />
+      <span className="lamp-orb" aria-hidden />
+      <span className="relative space-y-3">
+        <span className="block font-serif text-xl leading-snug text-ink sm:text-2xl">
           {title}
         </span>
-        <span className="block text-sm leading-6 text-ink/62">{mood}</span>
+        <span className="block text-sm leading-6 text-ink/55">{mood}</span>
       </span>
     </button>
   );

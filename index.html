@@ -7,10 +7,9 @@
       name="description"
       content="A quiet place to land for five minutes — when you're bored but don't want to scroll. Two people talking in a room you don't have to be in."
     />
-    <meta name="theme-color" content="#f7f0e7" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1a1815" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#14110e" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Mood Room" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
@@ -51,12 +50,10 @@
     <title>What kind of boredom is this?</title>
     <style>
       /* Critical inline styles — applied before the main CSS bundle loads
-         so the first paint is the paper color, not a white flash. */
-      html, body { margin: 0; background: #f7f0e7; color: #2f2b27; min-height: 100vh; }
-      @media (prefers-color-scheme: dark) {
-        html, body { background: #1a1815; color: #e8e2d7; }
-      }
-      html[data-late] body { background: #1a1815; color: #e8e2d7; }
+         so the first paint is the dark room, not a white flash. Mood Room is
+         a place to land when you're tired, so it's dark-first regardless of
+         the OS light/dark preference. */
+      html, body { margin: 0; background: #14110e; color: #eae1d2; min-height: 100vh; }
     </style>
   </head>
   <body>
