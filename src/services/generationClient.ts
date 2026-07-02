@@ -1,6 +1,7 @@
 import type {
   CharacterPair,
   RoomConversation,
+  RoomScene,
   RoomTone,
   RoomTopicTag,
   StupidMission,
@@ -10,6 +11,14 @@ import { track } from "./analytics";
 
 type GenerationKind = "room" | "story" | "mission";
 
+// The current sound world, so a generated exchange can react to what's
+// audible. The server whitelists every value.
+export type Soundscape = {
+  scene: RoomScene;
+  raining: boolean;
+  recentSounds: string[];
+};
+
 type GenerationRequest =
   | {
       kind: "room";
@@ -18,6 +27,7 @@ type GenerationRequest =
       // ignores any client-supplied personality text.
       pairId: string;
       avoidTopic?: string;
+      soundscape?: Soundscape;
     }
   | {
       kind: "story";
@@ -111,13 +121,15 @@ async function requestGeneration(kind: GenerationKind, body: GenerationRequest) 
 export async function generateRoomConversation(
   tone: RoomTone,
   pair: CharacterPair,
-  avoidTopic?: string
+  avoidTopic?: string,
+  soundscape?: Soundscape
 ): Promise<RoomConversation | null> {
   const result = await requestGeneration("room", {
     kind: "room",
     tone,
     pairId: pair.id,
-    avoidTopic
+    avoidTopic,
+    soundscape
   });
 
   if (!isRecord(result) || !isString(result.topic) || !Array.isArray(result.lines)) {

@@ -7,6 +7,16 @@ import { resolveCharacterPair } from "./characterPairs";
 
 export type GenerationKind = "room" | "story" | "mission";
 
+// The room's current sound world, sent so a generated exchange can lightly
+// react to what's audible (the kettle that just went, the rain that came in).
+// Every field is whitelisted below — nothing here reaches the prompt as free
+// text, so it can't be used to inject instructions.
+export type Soundscape = {
+  scene?: string;
+  raining?: boolean;
+  recentSounds?: string[];
+};
+
 export type GenerationRequest = {
   kind?: GenerationKind;
   tone?: "regular" | "quiet" | "weird";
@@ -14,6 +24,7 @@ export type GenerationRequest = {
   avoidTopic?: string;
   avoidTitle?: string;
   avoidMission?: string;
+  soundscape?: Soundscape;
 };
 
 export type GenerationConfig = {
@@ -48,6 +59,60 @@ function normalizeTone(value: unknown): "regular" | "quiet" | "weird" {
   return typeof value === "string" && TONES.has(value)
     ? (value as "regular" | "quiet" | "weird")
     : "regular";
+}
+
+const ROOM_SCENES: Record<string, string> = {
+  kitchen: "a warm kitchen, close and domestic",
+  "before-rain": "hushed, the air just before rain",
+  odd: "still, but very slightly off",
+  still: "a still, quiet room"
+};
+const ROOM_SOUNDS = new Set([
+  "kettle",
+  "cup",
+  "keyboard",
+  "creak",
+  "paper",
+  "rain"
+]);
+
+type NormalizedSoundscape = {
+  scene: string;
+  raining: boolean;
+  sounds: string[];
+};
+
+// Reduce the client soundscape to whitelisted values only. Returns null when
+// there's nothing worth telling the model.
+function normalizeSoundscape(value: unknown): NormalizedSoundscape | null {
+  if (typeof value !== "object" || value === null) return null;
+  const v = value as Record<string, unknown>;
+  const scene =
+    typeof v.scene === "string" && v.scene in ROOM_SCENES ? v.scene : null;
+  const raining = v.raining === true;
+  const sounds = Array.isArray(v.recentSounds)
+    ? Array.from(
+        new Set(
+          v.recentSounds.filter(
+            (s): s is string => typeof s === "string" && ROOM_SOUNDS.has(s)
+          )
+        )
+      ).slice(0, 4)
+    : [];
+  if (!scene && !raining && sounds.length === 0) return null;
+  return { scene: scene ?? "still", raining, sounds };
+}
+
+function describeSoundscape(sc: NormalizedSoundscape): string {
+  const bits = [`The room sounds like ${ROOM_SCENES[sc.scene]}.`];
+  if (sc.raining) bits.push("Rain is falling outside.");
+  if (sc.sounds.length > 0) {
+    bits.push(`Sounds just heard nearby: ${sc.sounds.join(", ")}.`);
+  }
+  bits.push(
+    "At most one line may lightly acknowledge a sound or the weather in passing; most lines should ignore it. Never announce or narrate the sound."
+  );
+  return bits.join(" ");
 }
 
 // Client-supplied free text goes into the prompt as a single line, so strip
@@ -118,12 +183,14 @@ export function buildPrompts(request: GenerationRequest): {
     // Prompt content comes from the server-side pair table only; the client
     // contributes nothing but an id (unknown ids fall back to the default).
     const pair = resolveCharacterPair(request.pairId);
+    const soundscape = normalizeSoundscape(request.soundscape);
     const user = [
       "Mode: Room.",
       "Write overheard dialogue between the two named characters. They talk to each other, never to the user.",
       "Quiet tone: softer, shorter, less punchline-driven. Weird tone: stranger and more object-focused, never frantic.",
       `Requested tone: ${normalizeTone(request.tone)}.`,
       `Avoid repeating this topic: ${sanitizeFreeText(request.avoidTopic)}.`,
+      ...(soundscape ? [describeSoundscape(soundscape)] : []),
       `Character context: ${JSON.stringify(pair)}.`,
       "",
       "Return JSON shaped like:",
@@ -219,6 +286,13 @@ export function cacheKeyFor(request: GenerationRequest): string {
     parts.push(normalizeTone(request.tone));
     parts.push(resolveCharacterPair(request.pairId).id);
     parts.push(sanitizeFreeText(request.avoidTopic));
+    // Different sound worlds should generate different exchanges, so fold the
+    // normalized soundscape into the key (sorted sounds so order doesn't split
+    // the cache).
+    const sc = normalizeSoundscape(request.soundscape);
+    if (sc) {
+      parts.push(sc.scene, sc.raining ? "rain" : "dry", [...sc.sounds].sort().join(","));
+    }
   } else if (request.kind === "story") {
     parts.push(sanitizeFreeText(request.avoidTitle));
   } else if (request.kind === "mission") {
