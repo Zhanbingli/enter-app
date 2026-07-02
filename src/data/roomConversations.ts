@@ -241,7 +241,8 @@ export const roomConversations: RoomConversation[] = [
     lines: [
       {
         speaker: "Jules",
-        text: "The calendar page is curling up like it has formally resigned from the month."
+        text: "The calendar page is curling up like it has formally resigned from the month.",
+        cue: "paper"
       },
       {
         speaker: "Nori",
@@ -341,7 +342,8 @@ export const roomConversations: RoomConversation[] = [
     lines: [
       {
         speaker: "Jules",
-        text: "The mug is slightly off-center on the saucer. This feels like legal trouble."
+        text: "The mug is slightly off-center on the saucer. This feels like legal trouble.",
+        cue: "cup"
       },
       {
         speaker: "Nori",
@@ -416,7 +418,8 @@ export const roomConversations: RoomConversation[] = [
     lines: [
       {
         speaker: "Ada",
-        text: "The closed book made the smallest settling sound. Like it remembered it was full of rooms."
+        text: "The closed book made the smallest settling sound. Like it remembered it was full of rooms.",
+        cue: "creak"
       },
       {
         speaker: "Sol",

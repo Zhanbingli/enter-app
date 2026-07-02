@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { getAudioContext } from "../audio/context";
 import {
   BAND_GAIN_MULTIPLIER,
+  createRainHiss,
   gapForTone,
   makePinkNoiseBuffer,
   makeWhiteNoiseBuffer,
@@ -17,6 +18,7 @@ const BASE_MASTER_GAIN = 0.04;
 type SchedulerState = {
   timeoutId: number | null;
   tone: RoomTone;
+  scene: RoomScene;
 };
 
 // A rain bed, faded in under the pad when a line summons rain. Created lazily
@@ -57,6 +59,8 @@ const SCENE_WARMTH: Record<RoomScene, number> = {
 
 function setSceneOn(nodes: AmbientNodes, scene: RoomScene) {
   const now = nodes.context.currentTime;
+  // Bias which foley the scheduler tends to pick, too.
+  nodes.scheduler.scene = scene;
   nodes.toneFilter.frequency.setTargetAtTime(SCENE_WARMTH[scene], now, 1.2);
   const twinDetune = scene === "odd" ? -16 : 0;
   const [rootVoice, twinVoice] = nodes.fifthVoices;
@@ -74,28 +78,8 @@ function setRainOn(nodes: AmbientNodes, on: boolean) {
 
   if (on) {
     if (!nodes.rain) {
-      const source = context.createBufferSource();
-      source.buffer = makePinkNoiseBuffer(context, 6);
-      source.loop = true;
-
-      const hp = context.createBiquadFilter();
-      hp.type = "highpass";
-      hp.frequency.value = 500;
-
-      const bp = context.createBiquadFilter();
-      bp.type = "bandpass";
-      bp.frequency.value = 1200;
-      bp.Q.value = 0.6;
-
-      const gain = context.createGain();
+      const { source, gain } = createRainHiss(context, nodes.master);
       gain.gain.value = 0.0001;
-
-      source.connect(hp);
-      hp.connect(bp);
-      bp.connect(gain);
-      gain.connect(nodes.master);
-      source.start();
-
       nodes.rain = { source, gain };
     }
     nodes.rain.gain.gain.cancelScheduledValues(now);
@@ -125,6 +109,7 @@ function scheduleNextTexture(nodes: AmbientNodes) {
       nodes.context,
       nodes.textureBus,
       nodes.scheduler.tone,
+      nodes.scheduler.scene,
       nodes.textureBuffer,
       nodes.whiteBuffer
     );
@@ -246,7 +231,7 @@ function createAmbientNodes(
     toneFilter,
     fifthVoices: [fifthA, fifthB],
     rain: null,
-    scheduler: { timeoutId: null, tone: initialTone }
+    scheduler: { timeoutId: null, tone: initialTone, scene: "still" }
   };
 }
 

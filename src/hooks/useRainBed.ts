@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 import { getAudioContext } from "../audio/context";
 import {
   BAND_GAIN_MULTIPLIER,
-  makePinkNoiseBuffer,
+  createRainHiss,
   makeWhiteNoiseBuffer
 } from "../audio/textures";
 import { getTimeBand } from "../services/timeBand";
@@ -60,27 +60,10 @@ function createRainNodes(context: AudioContext): RainNodes {
   master.gain.value = 0.0001;
   master.connect(context.destination);
 
-  // Steady rain hiss: looped pink noise through a bandpass, slight modulation.
-  const rain = context.createBufferSource();
-  rain.buffer = makePinkNoiseBuffer(context, 6);
-  rain.loop = true;
-
-  const bp = context.createBiquadFilter();
-  bp.type = "bandpass";
-  bp.frequency.value = 1200;
-  bp.Q.value = 0.6;
-
-  const hp = context.createBiquadFilter();
-  hp.type = "highpass";
-  hp.frequency.value = 500;
-
-  const rainGain = context.createGain();
+  // Steady rain hiss (shared with the Room's rain bridge), with a slow gain
+  // wobble so it feels weather-shaped, not static.
+  const { source: rain, gain: rainGain } = createRainHiss(context, master);
   rainGain.gain.value = 0.55;
-
-  rain.connect(hp);
-  hp.connect(bp);
-  bp.connect(rainGain);
-  rainGain.connect(master);
 
   // Slow LFO on rain gain so it feels weather-shaped, not static.
   const lfo = context.createOscillator();
@@ -91,8 +74,6 @@ function createRainNodes(context: AudioContext): RainNodes {
   lfo.connect(lfoDepth);
   lfoDepth.connect(rainGain.gain);
   lfo.start();
-
-  rain.start();
 
   const whiteBuffer = makeWhiteNoiseBuffer(context, 0.3);
 
