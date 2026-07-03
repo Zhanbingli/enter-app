@@ -31,12 +31,13 @@
 
 /* --- Palette: the lamplit room ------------------------------------------
    Dark-first, on purpose. This is a place to land when you're tired or
-   lonely, so the base is a warm near-black room lit by a single amber
-   lamp — not a bright page. Time of day tints the lamp, not the walls. */
+   lonely, so the base is a dim, warm room lit by a single amber lamp — dim
+   and cosy, not a black void (an earlier near-black read as oppressive).
+   Time of day tints the lamp, not the walls. */
 :root {
-  --color-paper: 20 17 14; /* #14110e — the dark room (base surface) */
-  --color-ink: 234 225 210; /* #eae1d2 — warm off-white, the text */
-  --color-cream: 32 27 22; /* #201b16 — a surface lifted toward the light */
+  --color-paper: 36 29 22; /* #241d16 — the dim warm room (base surface) */
+  --color-ink: 236 227 213; /* #ece3d5 — warm off-white, the text */
+  --color-cream: 52 43 33; /* #342b21 — a surface lifted toward the light */
   --color-lamp: 232 186 122; /* #e8ba7a — amber lamplight, the signature glow */
   --color-clay: 212 142 108; /* #d48e6c — ember accent */
   --color-moss: 146 168 130; /* #92a882 */
@@ -84,9 +85,9 @@ button {
 /* --- Home: the room, with one warm lamp overhead ------------------------ */
 .soft-noise {
   background-image:
-    radial-gradient(115% 80% at 50% -12%, rgba(232, 186, 122, 0.13), transparent 62%),
-    radial-gradient(80% 60% at 82% 112%, rgba(132, 162, 172, 0.06), transparent 60%),
-    linear-gradient(180deg, #17130f 0%, #100d0a 100%);
+    radial-gradient(125% 95% at 50% -10%, rgba(233, 188, 126, 0.22), transparent 60%),
+    radial-gradient(90% 65% at 82% 114%, rgba(163, 122, 88, 0.11), transparent 60%),
+    linear-gradient(180deg, #2c2219 0%, #1d1610 100%);
   transition: background-image 1200ms ease;
 }
 
@@ -94,58 +95,58 @@ button {
    it amber. The walls stay dark either way. */
 :root[data-band="dawn"] .soft-noise {
   background-image:
-    radial-gradient(115% 80% at 50% -12%, rgba(214, 176, 186, 0.11), transparent 62%),
-    radial-gradient(80% 60% at 82% 112%, rgba(132, 162, 172, 0.06), transparent 60%),
-    linear-gradient(180deg, #16130f 0%, #100e0b 100%);
+    radial-gradient(125% 95% at 50% -10%, rgba(219, 182, 190, 0.18), transparent 60%),
+    radial-gradient(90% 65% at 82% 114%, rgba(150, 130, 150, 0.09), transparent 60%),
+    linear-gradient(180deg, #2b2119 0%, #1d1712 100%);
 }
 :root[data-band="dusk"] .soft-noise {
   background-image:
-    radial-gradient(115% 82% at 50% -12%, rgba(226, 150, 92, 0.17), transparent 62%),
-    radial-gradient(80% 60% at 82% 112%, rgba(120, 90, 70, 0.07), transparent 60%),
-    linear-gradient(180deg, #191310 0%, #110c09 100%);
+    radial-gradient(128% 98% at 50% -10%, rgba(230, 152, 94, 0.26), transparent 60%),
+    radial-gradient(90% 65% at 82% 114%, rgba(170, 110, 78, 0.11), transparent 60%),
+    linear-gradient(180deg, #2f2216 0%, #1f150d 100%);
 }
 :root[data-band="evening"] .soft-noise {
   background-image:
-    radial-gradient(115% 80% at 50% -12%, rgba(230, 170, 110, 0.14), transparent 62%),
-    radial-gradient(80% 60% at 82% 112%, rgba(110, 90, 72, 0.06), transparent 60%),
-    linear-gradient(180deg, #17120e 0%, #100c09 100%);
+    radial-gradient(125% 95% at 50% -10%, rgba(232, 172, 114, 0.22), transparent 60%),
+    radial-gradient(90% 65% at 82% 114%, rgba(150, 108, 80, 0.10), transparent 60%),
+    linear-gradient(180deg, #2c2015 0%, #1c140d 100%);
 }
 :root[data-band="deep-night"] .soft-noise,
 :root[data-late] .soft-noise {
   background-image:
-    radial-gradient(115% 78% at 50% -12%, rgba(232, 186, 122, 0.08), transparent 62%),
-    radial-gradient(80% 60% at 82% 112%, rgba(132, 162, 172, 0.05), transparent 60%),
-    linear-gradient(180deg, #131009 0%, #0d0a07 100%);
+    radial-gradient(122% 92% at 50% -10%, rgba(233, 188, 126, 0.15), transparent 60%),
+    radial-gradient(90% 65% at 82% 114%, rgba(140, 150, 165, 0.07), transparent 60%),
+    linear-gradient(180deg, #261c14 0%, #18110c 100%);
 }
 
-/* --- Mode rooms: each keeps its own light temperature, all dimmed ------- */
+/* --- Mode rooms: each keeps its own light temperature, dim but not black -- */
 .soft-room {
   background-image:
-    radial-gradient(100% 70% at 50% -8%, rgba(150, 178, 200, 0.10), transparent 60%),
-    radial-gradient(90% 60% at 80% 108%, rgba(60, 80, 95, 0.10), transparent 60%),
-    linear-gradient(180deg, #141a1f 0%, #0e1216 100%);
+    radial-gradient(110% 78% at 50% -8%, rgba(158, 186, 208, 0.15), transparent 60%),
+    radial-gradient(95% 65% at 80% 110%, rgba(80, 104, 122, 0.12), transparent 60%),
+    linear-gradient(180deg, #1e262d 0%, #151d23 100%);
 }
 
 .soft-story {
   background-image:
-    radial-gradient(100% 70% at 50% -8%, rgba(232, 186, 122, 0.13), transparent 60%),
-    radial-gradient(90% 60% at 80% 108%, rgba(180, 120, 80, 0.08), transparent 60%),
-    linear-gradient(180deg, #1a140e 0%, #120d08 100%);
+    radial-gradient(110% 78% at 50% -8%, rgba(233, 188, 126, 0.20), transparent 60%),
+    radial-gradient(95% 65% at 80% 110%, rgba(188, 128, 84, 0.10), transparent 60%),
+    linear-gradient(180deg, #2a1f14 0%, #1c140c 100%);
 }
 
 .soft-mission {
   background-image:
-    radial-gradient(100% 70% at 50% -8%, rgba(150, 176, 130, 0.11), transparent 60%),
-    radial-gradient(90% 60% at 80% 108%, rgba(90, 110, 80, 0.08), transparent 60%),
-    linear-gradient(180deg, #141810 0%, #0e120b 100%);
+    radial-gradient(110% 78% at 50% -8%, rgba(160, 186, 138, 0.16), transparent 60%),
+    radial-gradient(95% 65% at 80% 110%, rgba(104, 128, 92, 0.10), transparent 60%),
+    linear-gradient(180deg, #1e2617 0%, #151b0f 100%);
 }
 
 /* Rain window — the hidden room. Cool grey-blue, layered streak animation. */
 .soft-rain {
   background-image:
-    radial-gradient(100% 70% at 50% -8%, rgba(170, 195, 215, 0.10), transparent 60%),
-    radial-gradient(90% 60% at 80% 108%, rgba(50, 70, 90, 0.14), transparent 60%),
-    linear-gradient(180deg, #12171d 0%, #0d1116 100%);
+    radial-gradient(110% 78% at 50% -8%, rgba(178, 202, 222, 0.14), transparent 60%),
+    radial-gradient(95% 65% at 80% 110%, rgba(66, 90, 114, 0.16), transparent 60%),
+    linear-gradient(180deg, #1c242d 0%, #141b23 100%);
   position: relative;
 }
 
@@ -200,10 +201,10 @@ button {
   border-radius: 9999px;
   pointer-events: none;
   filter: blur(30px);
-  opacity: 0.42;
+  opacity: 0.5;
   background: radial-gradient(
     circle at 40% 40%,
-    rgb(var(--glow) / 0.85),
+    rgb(var(--glow) / 0.9),
     transparent 68%
   );
   transition:
