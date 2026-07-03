@@ -290,6 +290,15 @@ button {
   color: rgb(var(--color-ink) / 0.62);
 }
 
+/* On phones the mode cards stack and reach the bottom of the screen, so this
+   fixed line would sit on top of them. It's an ambient flourish, not
+   essential — hide it where there's no room for it to drift. */
+@media (max-width: 767px) {
+  .eavesdrop {
+    display: none;
+  }
+}
+
 @keyframes eavesdrop-cycle {
   0% {
     opacity: 0;
