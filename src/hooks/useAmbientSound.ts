@@ -10,6 +10,7 @@ import {
   playRandomTexture,
   type NamedTexture
 } from "../audio/textures";
+import { playMurmur, type MurmurOptions } from "../audio/voice";
 import { getTimeBand } from "../services/timeBand";
 import type { RoomScene, RoomTone } from "../types";
 
@@ -318,6 +319,14 @@ export function useAmbientSound() {
     setSceneOn(nodes, scene);
   }
 
+  // A muffled murmur for a line as it lands — you hear them talking through
+  // the wall. Goes through the texture bus, so muting the room silences it too.
+  function murmur(options: MurmurOptions) {
+    const nodes = nodesRef.current;
+    if (!nodes) return;
+    playMurmur(nodes.context, nodes.textureBus, options);
+  }
+
   function stopSound() {
     const nodes = nodesRef.current;
     if (!nodes) {
@@ -363,6 +372,7 @@ export function useAmbientSound() {
     setTone,
     playCue,
     setRain,
-    setScene
+    setScene,
+    murmur
   };
 }

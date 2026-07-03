@@ -92,7 +92,8 @@ export function RoomMode({ onOff }: RoomModeProps) {
     setTone: setAmbientTone,
     playCue,
     setRain,
-    setScene
+    setScene,
+    murmur
   } = useAmbientSound();
 
   const { streamLines, isAtEnd } = useRoomStream({
@@ -101,6 +102,15 @@ export function RoomMode({ onOff }: RoomModeProps) {
     conversation,
     paused: isToneLoading,
     onEmit: (line) => {
+      // Every line is murmured through the wall as it lands — you hear the
+      // two of them talking, never the words.
+      const words = line.text.split(/\s+/).length;
+      murmur({
+        high: line.align === "right",
+        pan: line.align === "right" ? 0.32 : -0.32,
+        syllables: Math.max(2, Math.min(8, Math.round(words * 0.8))),
+        question: line.text.trim().endsWith("?")
+      });
       if (!line.cue) return;
       recentCuesRef.current = [...recentCuesRef.current, line.cue].slice(-3);
       if (line.cue === "rain") {
