@@ -35,38 +35,31 @@ type AmbientNodes = {
   textureBus: GainNode;
   textureBuffer: AudioBuffer;
   whiteBuffer: AudioBuffer;
-  oscillators: OscillatorNode[];
-  noiseSource: AudioBufferSourceNode;
-  lfo: OscillatorNode;
-  // The pad's low-pass and the fifth's two voices — held so the scene can
-  // warm or cool the bed and lean the fifth slightly sour.
-  toneFilter: BiquadFilterNode;
-  fifthVoices: OscillatorNode[];
+  // Everything that needs stopping on teardown (noise beds + the breathing LFO).
+  sources: AudioScheduledSourceNode[];
+  // The "air" layer's low-pass — the scene opens or closes it so the room
+  // sounds brighter or more hushed.
+  airFilter: BiquadFilterNode;
   rain: RainInsert | null;
   scheduler: SchedulerState;
 };
 
-// Colour the pad to the room's character. Warmth is the filter cutoff — a
-// kitchen is a touch brighter and closer, the hush before rain is darker and
-// hollower. When the talk turns odd, the fifth's twin drifts a few cents so
-// the drone sits slightly sour without becoming unpleasant. All ramps are
-// slow so the room never seems to flip a switch.
-const SCENE_WARMTH: Record<RoomScene, number> = {
-  kitchen: 760,
-  still: 640,
-  "before-rain": 560,
-  odd: 660
+// How open the room's air sounds, per scene. A kitchen is bright and present;
+// the hush before rain is closed and hollow; an odd room sits a little muffled.
+// This is a filter cutoff on broadband noise — not a musical pitch — so it
+// shapes the *air*, never hums.
+const SCENE_AIR: Record<RoomScene, number> = {
+  kitchen: 1800,
+  still: 1300,
+  "before-rain": 950,
+  odd: 1150
 };
 
 function setSceneOn(nodes: AmbientNodes, scene: RoomScene) {
   const now = nodes.context.currentTime;
   // Bias which foley the scheduler tends to pick, too.
   nodes.scheduler.scene = scene;
-  nodes.toneFilter.frequency.setTargetAtTime(SCENE_WARMTH[scene], now, 1.2);
-  const twinDetune = scene === "odd" ? -16 : 0;
-  const [rootVoice, twinVoice] = nodes.fifthVoices;
-  rootVoice?.detune.setTargetAtTime(0, now, 1.5);
-  twinVoice?.detune.setTargetAtTime(twinDetune, now, 1.5);
+  nodes.airFilter.frequency.setTargetAtTime(SCENE_AIR[scene], now, 1.4);
 }
 
 // Fade a rain bed in (or out) under the ambient pad. Same recipe as the
@@ -133,81 +126,55 @@ function createAmbientNodes(
   master.gain.value = 0.0001;
   master.connect(context.destination);
 
-  // Tone bed: a warm, consonant pad instead of a muddy hum. An open fifth
-  // in A — root (A2) + fifth (E3) — with a sub an octave below (A1) for
-  // body. Everything is harmonically related, so there's no dissonant
-  // low-end beating. (The old bed layered a 60 Hz "fridge" sine against a
-  // 78 Hz drone; 60 and 78 beat at 18 Hz and 60 Hz reads as mains hum, so
-  // the whole thing sounded electrical.) Paired voices are detuned by a
-  // fraction of a hertz for a slow, warm chorus rather than a still tone.
-  const toneFilter = context.createBiquadFilter();
-  toneFilter.type = "lowpass";
-  toneFilter.frequency.value = 640;
-  toneFilter.Q.value = 0.3;
+  // Room tone, not a drone. A real room doesn't hum a chord — it has air:
+  // warm low presence plus a soft high wash. The old sustained sine pad read
+  // as an electrical "hum" and killed the sense of being somewhere, so the
+  // bed is now two layers of filtered pink noise instead of any pitch:
+  //   - body: low-passed noise for warm room presence (the weight in the air)
+  //   - air:  band-limited noise for the soft hiss of a quiet room
+  // The murmur, textures and rain ride on top; together they read as a place.
 
-  const toneGain = context.createGain();
-  toneGain.gain.value = 0.8;
-  toneFilter.connect(toneGain);
-  toneGain.connect(master);
+  const bodySource = context.createBufferSource();
+  bodySource.buffer = makePinkNoiseBuffer(context, 6);
+  bodySource.loop = true;
+  const bodyFilter = context.createBiquadFilter();
+  bodyFilter.type = "lowpass";
+  bodyFilter.frequency.value = 220;
+  bodyFilter.Q.value = 0.4;
+  const bodyGain = context.createGain();
+  bodyGain.gain.value = 0.5;
+  bodySource.connect(bodyFilter);
+  bodyFilter.connect(bodyGain);
+  bodyGain.connect(master);
 
-  const makeVoice = (freq: number, level: number) => {
-    const osc = context.createOscillator();
-    osc.type = "sine";
-    osc.frequency.value = freq;
-    const gain = context.createGain();
-    gain.gain.value = level;
-    osc.connect(gain);
-    gain.connect(toneFilter);
-    return osc;
-  };
+  const airSource = context.createBufferSource();
+  airSource.buffer = makePinkNoiseBuffer(context, 6);
+  airSource.loop = true;
+  const airHighpass = context.createBiquadFilter();
+  airHighpass.type = "highpass";
+  airHighpass.frequency.value = 240;
+  const airFilter = context.createBiquadFilter();
+  airFilter.type = "lowpass";
+  airFilter.frequency.value = 1300; // scene opens/closes this
+  airFilter.Q.value = 0.3;
+  const airGain = context.createGain();
+  airGain.gain.value = 0.24;
+  airSource.connect(airHighpass);
+  airHighpass.connect(airFilter);
+  airFilter.connect(airGain);
+  airGain.connect(master);
 
-  // Root A2 (110 Hz) + fifth E3 (164.81 Hz), each with a detuned twin, plus
-  // a quiet octave (A3) so there's some presence on small speakers that
-  // roll off the low end.
-  const rootA = makeVoice(110, 0.34);
-  const rootB = makeVoice(110.25, 0.34);
-  const fifthA = makeVoice(164.81, 0.2);
-  const fifthB = makeVoice(164.4, 0.2);
-  const octave = makeVoice(220, 0.1);
-
-  // Sub an octave below the root (A1, 55 Hz) — quiet body, consonant with
-  // everything above it. Replaces the old fridge hum.
-  const subOsc = context.createOscillator();
-  subOsc.type = "sine";
-  subOsc.frequency.value = 55;
-  const subGain = context.createGain();
-  subGain.gain.value = 0.28;
-  subOsc.connect(subGain);
-  subGain.connect(master);
-
-  // Pink noise bed for breath/texture.
-  const noiseSource = context.createBufferSource();
-  noiseSource.buffer = makePinkNoiseBuffer(context, 6);
-  noiseSource.loop = true;
-
-  const noiseFilter = context.createBiquadFilter();
-  noiseFilter.type = "lowpass";
-  noiseFilter.frequency.value = 900;
-  noiseFilter.Q.value = 0.5;
-
-  const noiseGain = context.createGain();
-  noiseGain.gain.value = 0.5;
-
-  noiseSource.connect(noiseFilter);
-  noiseFilter.connect(noiseGain);
-  noiseGain.connect(master);
-
-  // Slow LFO modulating master volume so the bed breathes.
+  // Slow LFO on the air so the room breathes rather than sitting perfectly
+  // still — a gentle swell, like a draft moving through.
   const lfo = context.createOscillator();
   lfo.type = "sine";
-  lfo.frequency.value = 0.07;
-
+  lfo.frequency.value = 0.05;
   const lfoDepth = context.createGain();
-  lfoDepth.gain.value = 0.006;
+  lfoDepth.gain.value = 0.08;
   lfo.connect(lfoDepth);
-  lfoDepth.connect(master.gain);
+  lfoDepth.connect(airGain.gain);
 
-  // Texture bus: receives sparse procedural events.
+  // Texture bus: receives sparse procedural events (foley + murmur).
   const textureBus = context.createGain();
   textureBus.gain.value = 0.85;
   textureBus.connect(master);
@@ -215,10 +182,8 @@ function createAmbientNodes(
   const textureBuffer = makePinkNoiseBuffer(context, 2);
   const whiteBuffer = makeWhiteNoiseBuffer(context, 0.4);
 
-  const oscillators = [rootA, rootB, fifthA, fifthB, octave, subOsc];
-  oscillators.forEach((osc) => osc.start());
-  noiseSource.start();
-  lfo.start();
+  const sources: AudioScheduledSourceNode[] = [bodySource, airSource, lfo];
+  sources.forEach((source) => source.start());
 
   return {
     context,
@@ -226,11 +191,8 @@ function createAmbientNodes(
     textureBus,
     textureBuffer,
     whiteBuffer,
-    oscillators,
-    noiseSource,
-    lfo,
-    toneFilter,
-    fifthVoices: [fifthA, fifthB],
+    sources,
+    airFilter,
     rain: null,
     scheduler: { timeoutId: null, tone: initialTone, scene: "still" }
   };
@@ -342,9 +304,7 @@ export function useAmbientSound() {
     // Disconnect after the fade so we don't click. The shared context stays
     // alive so the next visit doesn't need another user gesture.
     window.setTimeout(() => {
-      nodes.oscillators.forEach(stopOsc);
-      stopOsc(nodes.noiseSource);
-      stopOsc(nodes.lfo);
+      nodes.sources.forEach(stopOsc);
       stopOsc(nodes.rain?.source);
       try {
         nodes.master.disconnect();
