@@ -173,6 +173,22 @@ const MISSION_SHAPE = JSON.stringify(
   2
 );
 
+// One-shot voice anchors, lifted from the hand-written content, so generated
+// output lands in the same warm, small, gently strange register instead of
+// generic assistant prose. The model is told to match the voice, not reuse
+// the content.
+const ROOM_VOICE_EXAMPLE = [
+  "Match this voice — a tiny, warm, gently strange overheard exchange, often about an everyday object. Do not reuse the content:",
+  'A: "The fridge is humming again. It sounds like it knows one note and trusts it completely."',
+  'B: "Confidence like that is rare in an appliance."'
+].join("\n");
+
+const STORY_VOICE_EXAMPLE =
+  'Match this whimsical, low-stakes register (do not reuse it) — scenario example: "A crow on your windowsill has questions about your spending this month. It is holding a small clipboard."';
+
+const MISSION_VOICE_EXAMPLE =
+  'Match this register (do not reuse these) — example missions: "Name the quietest object in the room." / "Give a houseplant a job title." / "Find the oldest thing you can see and nod at it."';
+
 export function buildPrompts(request: GenerationRequest): {
   system: string;
   user: string;
@@ -193,6 +209,8 @@ export function buildPrompts(request: GenerationRequest): {
       ...(soundscape ? [describeSoundscape(soundscape)] : []),
       `Character context: ${JSON.stringify(pair)}.`,
       "",
+      ROOM_VOICE_EXAMPLE,
+      "",
       "Return JSON shaped like:",
       roomShape(pair.characterA.name, pair.characterB.name)
     ].join("\n");
@@ -206,6 +224,8 @@ export function buildPrompts(request: GenerationRequest): {
       "Use id 'start' for the first step. Ending steps must have an empty choices array and a short ending string. Non-ending steps must have an empty string for ending.",
       `Avoid repeating this title: ${sanitizeFreeText(request.avoidTitle)}.`,
       "",
+      STORY_VOICE_EXAMPLE,
+      "",
       "Return JSON shaped like:",
       STORY_SHAPE
     ].join("\n");
@@ -218,6 +238,8 @@ export function buildPrompts(request: GenerationRequest): {
     "The mission should be doable in the room in under a minute.",
     "No reward language, no scoring, no follow-up celebration. Just the mission line itself.",
     `Avoid repeating this mission: ${sanitizeFreeText(request.avoidMission)}.`,
+    "",
+    MISSION_VOICE_EXAMPLE,
     "",
     "Return JSON shaped like:",
     MISSION_SHAPE

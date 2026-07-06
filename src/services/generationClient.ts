@@ -136,11 +136,22 @@ export async function generateRoomConversation(
     return null;
   }
 
+  // Only the two real characters may speak. The server prompts for exactly
+  // these names, but guard against a hallucinated speaker (a stray "Narrator"
+  // would otherwise render mis-aligned), and normalize casing to the pair.
+  const names = [pair.characterA.name, pair.characterB.name];
   const lines = result.lines
     .filter(
       (line): line is { speaker: string; text: string } =>
         isRecord(line) && isString(line.speaker) && isString(line.text)
     )
+    .map((line) => {
+      const match = names.find(
+        (name) => name.toLowerCase() === line.speaker.trim().toLowerCase()
+      );
+      return match ? { speaker: match, text: line.text } : null;
+    })
+    .filter((line): line is { speaker: string; text: string } => line !== null)
     .slice(0, tone === "quiet" ? 3 : 5);
 
   if (lines.length < 3) {
