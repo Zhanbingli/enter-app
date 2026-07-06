@@ -125,6 +125,35 @@ button {
     radial-gradient(110% 78% at 50% -8%, rgba(158, 186, 208, 0.15), transparent 60%),
     radial-gradient(95% 65% at 80% 110%, rgba(80, 104, 122, 0.12), transparent 60%),
     linear-gradient(180deg, #1e262d 0%, #151d23 100%);
+  transition: background-image 1500ms ease;
+}
+
+/* The Room feels the hour too: cool and pale at dawn, lamp-warm through the
+   evening, deep and dim at night. Same cool-room identity, different light. */
+:root[data-band="dawn"] .soft-room {
+  background-image:
+    radial-gradient(110% 78% at 50% -8%, rgba(178, 194, 208, 0.14), transparent 60%),
+    radial-gradient(95% 65% at 80% 110%, rgba(96, 116, 134, 0.10), transparent 60%),
+    linear-gradient(180deg, #20282f 0%, #171f26 100%);
+}
+:root[data-band="dusk"] .soft-room {
+  background-image:
+    radial-gradient(110% 78% at 50% -8%, rgba(212, 164, 118, 0.15), transparent 60%),
+    radial-gradient(95% 65% at 80% 110%, rgba(122, 98, 86, 0.10), transparent 60%),
+    linear-gradient(180deg, #26232a 0%, #191519 100%);
+}
+:root[data-band="evening"] .soft-room {
+  background-image:
+    radial-gradient(110% 78% at 50% -8%, rgba(210, 170, 122, 0.14), transparent 60%),
+    radial-gradient(95% 65% at 80% 110%, rgba(110, 92, 84, 0.10), transparent 60%),
+    linear-gradient(180deg, #23202a 0%, #16131a 100%);
+}
+:root[data-band="deep-night"] .soft-room,
+:root[data-late] .soft-room {
+  background-image:
+    radial-gradient(110% 78% at 50% -8%, rgba(150, 176, 200, 0.10), transparent 60%),
+    radial-gradient(95% 65% at 80% 110%, rgba(58, 84, 106, 0.11), transparent 60%),
+    linear-gradient(180deg, #161d24 0%, #0e141a 100%);
 }
 
 .soft-story {
