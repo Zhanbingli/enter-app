@@ -141,6 +141,27 @@ button {
     linear-gradient(180deg, #1e2617 0%, #151b0f 100%);
 }
 
+/* A slow colour wash over the Room that follows the conversation's scene, so
+   the room's light temperature shifts with what's being talked about. A flat
+   rgba (which, unlike a gradient, transitions smoothly) kept subtle. */
+.room-tint {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: transparent;
+  transition: background-color 1600ms ease;
+}
+.room-tint[data-scene="kitchen"] {
+  background-color: rgba(216, 148, 84, 0.17);
+}
+.room-tint[data-scene="before-rain"] {
+  background-color: rgba(76, 112, 150, 0.19);
+}
+.room-tint[data-scene="odd"] {
+  background-color: rgba(126, 146, 96, 0.15);
+}
+
 /* Rain window — the hidden room. Cool grey-blue, layered streak animation. */
 .soft-rain {
   background-image:
