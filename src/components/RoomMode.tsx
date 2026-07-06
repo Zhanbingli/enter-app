@@ -227,9 +227,14 @@ export function RoomMode({ onOff }: RoomModeProps) {
   }
 
   const total = streamLines.length;
+  // The room's light temperature follows what's being talked about — warm in
+  // a kitchen, cool before rain, a little off when odd. A slow wash over the
+  // base so the room visibly breathes with the conversation.
+  const currentScene = sceneForConversation(conversation);
 
   return (
     <div className="soft-room min-h-screen">
+      <div className="room-tint" data-scene={currentScene} aria-hidden />
       <div
         className={`pointer-events-none fixed inset-0 z-[1] transition-opacity duration-[2500ms] ${
           raining ? "opacity-100" : "opacity-0"
