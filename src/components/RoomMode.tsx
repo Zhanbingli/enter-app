@@ -19,6 +19,7 @@ import type {
 } from "../types";
 import { randomItemExcept } from "../utils/random";
 import { ConversationBubble } from "./ConversationBubble";
+import { RoomFigures } from "./RoomFigures";
 
 type RoomModeProps = {
   onOff: () => void;
@@ -83,6 +84,10 @@ export function RoomMode({ onOff }: RoomModeProps) {
   const [isToneLoading, setIsToneLoading] = useState(false);
   const [raining, setRaining] = useState(false);
   const [soundOn, setSoundOn] = useState(isSoundEnabled);
+  // Which figure is talking right now — lights up their shadow while a line is
+  // on the air, then settles.
+  const [speaking, setSpeaking] = useState<"left" | "right" | null>(null);
+  const speakingTimer = useRef<number | null>(null);
   // The last few sounds the room actually made — sent to the generator so a
   // freshly written exchange can lightly acknowledge them.
   const recentCuesRef = useRef<string[]>([]);
@@ -111,6 +116,13 @@ export function RoomMode({ onOff }: RoomModeProps) {
         syllables: Math.max(2, Math.min(8, Math.round(words * 0.8))),
         question: line.text.trim().endsWith("?")
       });
+      // Light up the speaking figure for roughly the length of the line.
+      setSpeaking(line.align);
+      if (speakingTimer.current) window.clearTimeout(speakingTimer.current);
+      speakingTimer.current = window.setTimeout(
+        () => setSpeaking(null),
+        1400 + words * 90
+      );
       if (!line.cue) return;
       recentCuesRef.current = [...recentCuesRef.current, line.cue].slice(-3);
       if (line.cue === "rain") {
@@ -143,6 +155,13 @@ export function RoomMode({ onOff }: RoomModeProps) {
     setScene(sceneForConversation(conversation));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversation.id]);
+
+  useEffect(
+    () => () => {
+      if (speakingTimer.current) window.clearTimeout(speakingTimer.current);
+    },
+    []
+  );
 
   function leaveRoom() {
     playClick("off");
@@ -235,6 +254,7 @@ export function RoomMode({ onOff }: RoomModeProps) {
   return (
     <div className="soft-room min-h-screen">
       <div className="room-tint" data-scene={currentScene} aria-hidden />
+      <RoomFigures speaking={speaking} />
       <div
         className={`pointer-events-none fixed inset-0 z-[1] transition-opacity duration-[2500ms] ${
           raining ? "opacity-100" : "opacity-0"
