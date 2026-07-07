@@ -254,7 +254,7 @@ export function RoomMode({ onOff }: RoomModeProps) {
   return (
     <div className="soft-room min-h-screen">
       <div className="room-tint" data-scene={currentScene} aria-hidden />
-      <RoomFigures speaking={speaking} />
+      <RoomFigures speaking={speaking} pairId={pair.id} tone={tone} />
       <div
         className={`pointer-events-none fixed inset-0 z-[1] transition-opacity duration-[2500ms] ${
           raining ? "opacity-100" : "opacity-0"
