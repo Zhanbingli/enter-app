@@ -205,13 +205,31 @@ button {
   bottom: -5vh;
   width: min(38vw, 300px);
   height: 60vh;
-  opacity: 0.47;
-  filter: blur(9px);
+  opacity: 0.5;
+  filter: blur(7px);
   transition:
     opacity 800ms ease,
     filter 800ms ease,
     transform 800ms ease;
 }
+/* Posture wrapper: the tone bends it (quiet curls in, weird tilts). Sits
+   between the figure (lean) and the svg (breathing) so all three compose. */
+.figure-posture {
+  width: 100%;
+  height: 100%;
+  transform-origin: bottom center;
+  transition: transform 1000ms ease;
+}
+.figure[data-tone="quiet"] .figure-posture {
+  transform: translateY(7%) scale(0.88);
+}
+.figure-left[data-tone="weird"] .figure-posture {
+  transform: translateY(-3%) rotate(5deg);
+}
+.figure-right[data-tone="weird"] .figure-posture {
+  transform: translateY(-3%) rotate(-5deg);
+}
+
 /* Breathing lives on the svg so the figure's own transform (the lean) can
    compose with it instead of being overridden by the animation. */
 .figure svg {
